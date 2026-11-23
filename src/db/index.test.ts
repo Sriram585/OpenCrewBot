@@ -32,6 +32,15 @@ import {
   listApprovalRequests,
   logAudit,
   listAuditLogs,
+  createRun,
+  getRun,
+  updateRun,
+  listRuns,
+  createTask,
+  getTask,
+  updateTask,
+  listTasksByRun,
+  getRunDetails,
 } from "./index";
 import type { Client } from "@libsql/client";
 import type { Bot, ChatMessage, Room } from "@/lib/shared/types";
@@ -378,6 +387,73 @@ describe("SQLite Database Module (src/db)", () => {
       const agent1Logs = await listAuditLogs({ agentId: "agent-1" }, client);
       expect(agent1Logs).toHaveLength(1);
       expect(agent1Logs[0].toolName).toBe("web_search");
+    });
+  });
+
+  describe("Runs and Tasks (Module D: Execution Engine)", () => {
+    it("creates, retrieves, updates, and lists runs", async () => {
+      await createRun(
+        {
+          id: "run-db-1",
+          roomId: "room-marketing",
+          goal: "Plan product launch",
+          status: "PENDING",
+        },
+        client,
+      );
+
+      const run = await getRun("run-db-1", client);
+      expect(run).not.toBeNull();
+      expect(run?.goal).toBe("Plan product launch");
+      expect(run?.status).toBe("PENDING");
+
+      await updateRun("run-db-1", { status: "RUNNING", startedAt: "2026-01-01T10:00:00Z" }, client);
+      const updated = await getRun("run-db-1", client);
+      expect(updated?.status).toBe("RUNNING");
+      expect(updated?.startedAt).toBe("2026-01-01T10:00:00Z");
+
+      const runningList = await listRuns({ status: "RUNNING" }, client);
+      expect(runningList).toHaveLength(1);
+      expect(runningList[0].id).toBe("run-db-1");
+    });
+
+    it("creates, retrieves, updates, and links tasks to runs", async () => {
+      await createRun({ id: "run-db-2", goal: "Multi-task workflow" }, client);
+
+      await createTask(
+        {
+          id: "task-db-1",
+          runId: "run-db-2",
+          title: "Step 1: Scrape data",
+          dependencies: [],
+          status: "COMPLETED",
+          output: "Data scraped",
+        },
+        client,
+      );
+
+      await createTask(
+        {
+          id: "task-db-2",
+          runId: "run-db-2",
+          title: "Step 2: Synthesize findings",
+          dependencies: ["task-db-1"],
+          status: "PENDING",
+        },
+        client,
+      );
+
+      const t1 = await getTask("task-db-1", client);
+      expect(t1?.status).toBe("COMPLETED");
+      expect(t1?.output).toBe("Data scraped");
+
+      const t2 = await getTask("task-db-2", client);
+      expect(t2?.dependencies).toEqual(["task-db-1"]);
+
+      const details = await getRunDetails("run-db-2", client);
+      expect(details).not.toBeNull();
+      expect(details?.run.id).toBe("run-db-2");
+      expect(details?.tasks).toHaveLength(2);
     });
   });
 });

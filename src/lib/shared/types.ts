@@ -32,6 +32,15 @@ export interface Bot {
   approval: ApprovalMode;
   pinned: boolean;
   createdAt: string;
+  // Module B: Extended agent fields
+  role?: string;
+  modelProvider?: string;
+  primaryModel?: string;
+  fallbackModel?: string | null;
+  skills?: string[];
+  permissionLevel?: "ASK_FIRST" | "CONTROLLED_ACCESS" | "FULL_ACCESS";
+  outputFormat?: string;
+  isDynamic?: boolean;
 }
 
 export type BotInput = Omit<Bot, "id" | "createdAt" | "handle" | "connections"> & { handle?: string; connections?: string[] };
@@ -51,6 +60,40 @@ export interface Room {
 }
 
 export type RoomInput = Omit<Room, "id" | "createdAt">;
+
+// Module D: Execution Engine Types
+export type RunStatus = "PENDING" | "RUNNING" | "WAITING_APPROVAL" | "COMPLETED" | "FAILED" | "CANCELLED";
+export type TaskStatus = "PENDING" | "RUNNING" | "WAITING_APPROVAL" | "COMPLETED" | "FAILED" | "CANCELLED";
+
+export interface Run {
+  id: string;
+  roomId?: string | null;
+  goal: string;
+  status: RunStatus;
+  finalOutput?: string | null;
+  error?: string | null;
+  createdAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+}
+
+export interface Task {
+  id: string;
+  runId: string;
+  title: string;
+  description?: string | null;
+  assignedAgentId?: string | null;
+  dependencies: string[];
+  status: TaskStatus;
+  retries: number;
+  maxRetries: number;
+  timeoutMs: number;
+  approvalId?: string | null;
+  output?: string | null;
+  error?: string | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
+}
 
 /** `dm:<botId>` or `room:<roomId>`. */
 export type ConversationId = string;

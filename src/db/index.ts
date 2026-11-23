@@ -1,11 +1,12 @@
 // Local SQLite database module for OpenCrewBot.
 // Manages local persistence for bots, rooms, messages, settings, agent model configs, and model usage logs.
 import type { Client } from "@libsql/client";
-import type { Bot, ChatMessage, ConversationId, Room } from "@/lib/shared/types";
+import type { Bot, ChatMessage, ConversationId, Room, Run, RunStatus, Task, TaskStatus } from "@/lib/shared/types";
 import { getClient, openClient, closeClient } from "./client";
 import { initSchema, SCHEMA_VERSION } from "./schema";
 
 export { getClient, openClient, closeClient, initSchema, SCHEMA_VERSION };
+export type { Run, RunStatus, Task, TaskStatus };
 
 export function db(): Promise<Client> {
   return getClient();
@@ -33,6 +34,14 @@ function normalizeBot(raw: Bot): Bot {
   return {
     ...raw,
     connections: raw.connections ?? [],
+    ...(raw.role !== undefined ? { role: raw.role } : {}),
+    ...(raw.modelProvider !== undefined ? { modelProvider: raw.modelProvider } : {}),
+    ...(raw.primaryModel !== undefined ? { primaryModel: raw.primaryModel } : {}),
+    ...(raw.fallbackModel !== undefined ? { fallbackModel: raw.fallbackModel } : {}),
+    ...(raw.skills !== undefined ? { skills: raw.skills } : {}),
+    ...(raw.permissionLevel !== undefined ? { permissionLevel: raw.permissionLevel } : {}),
+    ...(raw.outputFormat !== undefined ? { outputFormat: raw.outputFormat } : {}),
+    ...(raw.isDynamic !== undefined ? { isDynamic: raw.isDynamic } : {}),
   };
 }
 
@@ -653,4 +662,275 @@ export async function listAuditLogs(
     resultSummary: r.result_summary ? String(r.result_summary) : null,
     error: r.error ? String(r.error) : null,
   }));
+}
+
+// ── runs & tasks (Module D: Execution Engine) ──────────────────────────
+
+export interface RunInput {
+  id: string;
+  roomId?: string | null;
+  goal: string;
+  status?: RunStatus;
+  finalOutput?: string | null;
+  error?: string | null;
+  createdAt?: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+}
+
+export interface TaskInput {
+  id: string;
+  runId: string;
+  title: string;
+  description?: string | null;
+  assignedAgentId?: string | null;
+  dependencies?: string[];
+  status?: TaskStatus;
+  retries?: number;
+  maxRetries?: number;
+  timeoutMs?: number;
+  approvalId?: string | null;
+  output?: string | null;
+  error?: string | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
+}
+
+export async function createRun(run: RunInput, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({
+    sql: `INSERT INTO runs (id, room_id, goal, status, final_output, error, created_at, started_at, completed_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            room_id = excluded.room_id,
+            goal = excluded.goal,
+            status = excluded.status,
+            final_output = excluded.final_output,
+            error = excluded.error,
+            started_at = excluded.started_at,
+            completed_at = excluded.completed_at`,
+    args: [
+      run.id,
+      run.roomId ?? null,
+      run.goal,
+      run.status || "PENDING",
+      run.finalOutput ?? null,
+      run.error ?? null,
+      run.createdAt || new Date().toISOString(),
+      run.startedAt ?? null,
+      run.completedAt ?? null,
+    ],
+  });
+}
+
+export async function getRun(id: string, client?: Client): Promise<Run | null> {
+  const c = client ?? (await db());
+  const res = await c.execute({
+    sql: "SELECT id, room_id, goal, status, final_output, error, created_at, started_at, completed_at FROM runs WHERE id = ?",
+    args: [id],
+  });
+  const r = res.rows[0];
+  if (!r) return null;
+  return {
+    id: String(r.id),
+    roomId: r.room_id ? String(r.room_id) : null,
+    goal: String(r.goal),
+    status: r.status as RunStatus,
+    finalOutput: r.final_output ? String(r.final_output) : null,
+    error: r.error ? String(r.error) : null,
+    createdAt: String(r.created_at),
+    startedAt: r.started_at ? String(r.started_at) : null,
+    completedAt: r.completed_at ? String(r.completed_at) : null,
+  };
+}
+
+export async function updateRun(id: string, patch: Partial<Run>, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  const existing = await getRun(id, c);
+  if (!existing) throw new Error(`Run ${id} not found`);
+
+  const updated: Run = { ...existing, ...patch };
+  await c.execute({
+    sql: `UPDATE runs SET
+            room_id = ?, goal = ?, status = ?, final_output = ?, error = ?, started_at = ?, completed_at = ?
+          WHERE id = ?`,
+    args: [
+      updated.roomId ?? null,
+      updated.goal,
+      updated.status,
+      updated.finalOutput ?? null,
+      updated.error ?? null,
+      updated.startedAt ?? null,
+      updated.completedAt ?? null,
+      id,
+    ],
+  });
+}
+
+export async function listRuns(
+  filter?: { status?: RunStatus; roomId?: string; limit?: number },
+  client?: Client,
+): Promise<Run[]> {
+  const c = client ?? (await db());
+  const limit = filter?.limit ?? 100;
+  const conditions: string[] = [];
+  const args: (string | number | null)[] = [];
+
+  if (filter?.status) {
+    conditions.push("status = ?");
+    args.push(filter.status);
+  }
+  if (filter?.roomId) {
+    conditions.push("room_id = ?");
+    args.push(filter.roomId);
+  }
+
+  const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  args.push(limit);
+
+  const res = await c.execute({
+    sql: `SELECT id, room_id, goal, status, final_output, error, created_at, started_at, completed_at
+          FROM runs ${whereClause} ORDER BY created_at DESC LIMIT ?`,
+    args,
+  });
+
+  return res.rows.map((r) => ({
+    id: String(r.id),
+    roomId: r.room_id ? String(r.room_id) : null,
+    goal: String(r.goal),
+    status: r.status as RunStatus,
+    finalOutput: r.final_output ? String(r.final_output) : null,
+    error: r.error ? String(r.error) : null,
+    createdAt: String(r.created_at),
+    startedAt: r.started_at ? String(r.started_at) : null,
+    completedAt: r.completed_at ? String(r.completed_at) : null,
+  }));
+}
+
+export async function createTask(task: TaskInput, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({
+    sql: `INSERT INTO tasks (
+            id, run_id, title, description, assigned_agent_id, dependencies_json, status, retries, max_retries, timeout_ms, approval_id, output, error, started_at, completed_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            title = excluded.title,
+            description = excluded.description,
+            assigned_agent_id = excluded.assigned_agent_id,
+            dependencies_json = excluded.dependencies_json,
+            status = excluded.status,
+            retries = excluded.retries,
+            max_retries = excluded.max_retries,
+            timeout_ms = excluded.timeout_ms,
+            approval_id = excluded.approval_id,
+            output = excluded.output,
+            error = excluded.error,
+            started_at = excluded.started_at,
+            completed_at = excluded.completed_at`,
+    args: [
+      task.id,
+      task.runId,
+      task.title,
+      task.description ?? null,
+      task.assignedAgentId ?? null,
+      JSON.stringify(task.dependencies || []),
+      task.status || "PENDING",
+      task.retries ?? 0,
+      task.maxRetries ?? 3,
+      task.timeoutMs ?? 60000,
+      task.approvalId ?? null,
+      task.output ?? null,
+      task.error ?? null,
+      task.startedAt ?? null,
+      task.completedAt ?? null,
+    ],
+  });
+}
+
+function parseTaskRow(r: Record<string, unknown>): Task {
+  let deps: string[] = [];
+  try {
+    deps = JSON.parse(String(r.dependencies_json || "[]")) as string[];
+  } catch {
+    deps = [];
+  }
+  return {
+    id: String(r.id),
+    runId: String(r.run_id),
+    title: String(r.title),
+    description: r.description ? String(r.description) : null,
+    assignedAgentId: r.assigned_agent_id ? String(r.assigned_agent_id) : null,
+    dependencies: deps,
+    status: r.status as TaskStatus,
+    retries: Number(r.retries || 0),
+    maxRetries: Number(r.max_retries || 3),
+    timeoutMs: Number(r.timeout_ms || 60000),
+    approvalId: r.approval_id ? String(r.approval_id) : null,
+    output: r.output ? String(r.output) : null,
+    error: r.error ? String(r.error) : null,
+    startedAt: r.started_at ? String(r.started_at) : null,
+    completedAt: r.completed_at ? String(r.completed_at) : null,
+  };
+}
+
+export async function getTask(id: string, client?: Client): Promise<Task | null> {
+  const c = client ?? (await db());
+  const res = await c.execute({
+    sql: "SELECT * FROM tasks WHERE id = ?",
+    args: [id],
+  });
+  const r = res.rows[0];
+  if (!r) return null;
+  return parseTaskRow(r as unknown as Record<string, unknown>);
+}
+
+export async function updateTask(id: string, patch: Partial<Task>, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  const existing = await getTask(id, c);
+  if (!existing) throw new Error(`Task ${id} not found`);
+
+  const updated: Task = { ...existing, ...patch };
+  await c.execute({
+    sql: `UPDATE tasks SET
+            title = ?, description = ?, assigned_agent_id = ?, dependencies_json = ?, status = ?,
+            retries = ?, max_retries = ?, timeout_ms = ?, approval_id = ?, output = ?, error = ?,
+            started_at = ?, completed_at = ?
+          WHERE id = ?`,
+    args: [
+      updated.title,
+      updated.description ?? null,
+      updated.assignedAgentId ?? null,
+      JSON.stringify(updated.dependencies || []),
+      updated.status,
+      updated.retries,
+      updated.maxRetries,
+      updated.timeoutMs,
+      updated.approvalId ?? null,
+      updated.output ?? null,
+      updated.error ?? null,
+      updated.startedAt ?? null,
+      updated.completedAt ?? null,
+      id,
+    ],
+  });
+}
+
+export async function listTasksByRun(runId: string, client?: Client): Promise<Task[]> {
+  const c = client ?? (await db());
+  const res = await c.execute({
+    sql: "SELECT * FROM tasks WHERE run_id = ?",
+    args: [runId],
+  });
+  return res.rows.map((r) => parseTaskRow(r as unknown as Record<string, unknown>));
+}
+
+export async function getRunDetails(
+  runId: string,
+  client?: Client,
+): Promise<{ run: Run; tasks: Task[] } | null> {
+  const c = client ?? (await db());
+  const run = await getRun(runId, c);
+  if (!run) return null;
+  const tasks = await listTasksByRun(runId, c);
+  return { run, tasks };
 }

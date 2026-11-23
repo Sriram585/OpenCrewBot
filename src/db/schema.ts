@@ -1,7 +1,7 @@
 // Local SQLite database schema definitions and migrations.
 import type { Client } from "@libsql/client";
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export const SCHEMA_STATEMENTS = [
   "CREATE TABLE IF NOT EXISTS bots (id TEXT PRIMARY KEY, data TEXT NOT NULL)",
@@ -72,6 +72,37 @@ export const SCHEMA_STATEMENTS = [
   )`,
   "CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs (timestamp)",
   "CREATE INDEX IF NOT EXISTS idx_audit_logs_agent ON audit_logs (agent_id, timestamp)",
+  `CREATE TABLE IF NOT EXISTS runs (
+    id TEXT PRIMARY KEY,
+    room_id TEXT,
+    goal TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('PENDING', 'RUNNING', 'WAITING_APPROVAL', 'COMPLETED', 'FAILED', 'CANCELLED')),
+    final_output TEXT,
+    error TEXT,
+    created_at TEXT NOT NULL,
+    started_at TEXT,
+    completed_at TEXT
+  )`,
+  "CREATE INDEX IF NOT EXISTS idx_runs_status ON runs (status, created_at)",
+  `CREATE TABLE IF NOT EXISTS tasks (
+    id TEXT PRIMARY KEY,
+    run_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    assigned_agent_id TEXT,
+    dependencies_json TEXT NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL CHECK(status IN ('PENDING', 'RUNNING', 'WAITING_APPROVAL', 'COMPLETED', 'FAILED', 'CANCELLED')),
+    retries INTEGER NOT NULL DEFAULT 0,
+    max_retries INTEGER NOT NULL DEFAULT 3,
+    timeout_ms INTEGER NOT NULL DEFAULT 60000,
+    approval_id TEXT,
+    output TEXT,
+    error TEXT,
+    started_at TEXT,
+    completed_at TEXT
+  )`,
+  "CREATE INDEX IF NOT EXISTS idx_tasks_run_id ON tasks (run_id)",
+  "CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks (status)",
 ];
 
 export async function initSchema(client: Client): Promise<void> {

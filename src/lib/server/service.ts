@@ -12,6 +12,7 @@ import { deleteWorkspace, writeMemory } from "./memory-files";
 import { forgetConversation, resetBot, runTurn, runningBots, stopConversation } from "./runtime";
 import { messagePreview } from "@/lib/shared/preview";
 import { roomConversationId, runRoom } from "./rooms";
+import { seedSpecializedAgents } from "./agent-factory";
 
 export { InputError };
 
@@ -23,6 +24,7 @@ export function boot(): Promise<void> {
   g.__opencrewbotBoot ??= (async () => {
     await sweepInterrupted();
     await seed();
+    await seedSpecializedAgents();
   })();
   return g.__opencrewbotBoot;
 }
