@@ -12,6 +12,29 @@ import { NewBotDrawer } from "./BotForms";
 import { NewRoomDrawer } from "./RoomForms";
 import { SettingsPanel } from "./SettingsPanel";
 import { ConnectionsPanel } from "./ConnectionsPanel";
+import { AgentWorkspaceView } from "./views/AgentWorkspaceView";
+import { DynamicAgentCreateView } from "./views/DynamicAgentCreateView";
+import { MemoryManagerView } from "./views/MemoryManagerView";
+import { SkillsManagerView } from "./views/SkillsManagerView";
+import { TaskDashboardView } from "./views/TaskDashboardView";
+import { ApprovalCentreView } from "./views/ApprovalCentreView";
+import { IntegrationsView } from "./views/IntegrationsView";
+import { ModelConfigView } from "./views/ModelConfigView";
+import { ScheduledWorkflowsView } from "./views/ScheduledWorkflowsView";
+import { ExecutionHistoryView } from "./views/ExecutionHistoryView";
+
+export type ActiveView =
+  | "chat"
+  | "agents"
+  | "create-agent"
+  | "memory"
+  | "skills"
+  | "tasks"
+  | "approvals"
+  | "integrations"
+  | "models"
+  | "workflows"
+  | "history";
 
 /** Modal sheets. Editing an existing bot or room happens in the inspector instead. */
 export type Panel = { kind: "new-bot" } | { kind: "new-room" } | { kind: "settings" } | { kind: "connections" } | null;
@@ -34,6 +57,8 @@ interface AppContext {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   toast: (message: string) => void;
+  activeView: ActiveView;
+  setActiveView: (view: ActiveView) => void;
 }
 
 const Ctx = createContext<AppContext | null>(null);
@@ -66,6 +91,7 @@ const isWide = () => window.matchMedia("(min-width: 1280px)").matches;
 export function OpenCrewBotApp() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [panel, setPanel] = useState<Panel>(null);
+  const [activeView, setActiveView] = useState<ActiveView>("chat");
   const [inspector, setInspectorState] = useState<InspectorState>({ open: false, tab: "details" });
   const [sidebarOpen, setSidebarState] = useState(true);
   const [toastText, setToastText] = useState<string | null>(null);
@@ -115,6 +141,7 @@ export function OpenCrewBotApp() {
 
   const open = useCallback(
     (id: ConversationId | null) => {
+      setActiveView("chat");
       dispatch({ type: "open", id });
       if (id) {
         void loadTranscript(id);
@@ -189,10 +216,23 @@ export function OpenCrewBotApp() {
   }, [state.active, activeUnreadMarker]);
 
   const value = useMemo(
-    () => ({ state, dispatch, open, refresh, setPanel, inspector, setInspector, sidebarOpen, setSidebarOpen, toast }),
-    [state, open, refresh, inspector, setInspector, sidebarOpen, setSidebarOpen, toast],
+    () => ({
+      state,
+      dispatch,
+      open,
+      refresh,
+      setPanel,
+      inspector,
+      setInspector,
+      sidebarOpen,
+      setSidebarOpen,
+      toast,
+      activeView,
+      setActiveView,
+    }),
+    [state, open, refresh, inspector, setInspector, sidebarOpen, setSidebarOpen, toast, activeView],
   );
-  const showInspector = inspector.open && Boolean(state.active);
+  const showInspector = inspector.open && Boolean(state.active) && activeView === "chat";
 
   return (
     <Ctx.Provider value={value}>
@@ -200,14 +240,38 @@ export function OpenCrewBotApp() {
         <div
           className={clsx(
             "h-full shrink-0 border-r border-line",
-            state.active ? "hidden" : "flex w-full",
+            (state.active && activeView === "chat") ? "hidden" : "flex w-full",
             sidebarOpen ? "md:flex md:w-[312px]" : "md:hidden",
           )}
         >
           <Sidebar />
         </div>
-        <main className={clsx("relative h-full min-w-0 flex-1", state.active ? "flex" : "hidden md:flex")}>
-          <ChatView />
+        <main
+          className={clsx(
+            "relative h-full min-w-0 flex-1",
+            (state.active || activeView !== "chat") ? "flex" : "hidden md:flex",
+          )}
+        >
+          {activeView === "chat" && <ChatView />}
+          {activeView === "agents" && (
+            <AgentWorkspaceView
+              onOpenCreateAgent={() => setActiveView("create-agent")}
+              onOpenBotChat={(botId) => open(`dm:${botId}`)}
+            />
+          )}
+          {activeView === "create-agent" && (
+            <DynamicAgentCreateView
+              onOpenBotChat={(botId) => open(`dm:${botId}`)}
+            />
+          )}
+          {activeView === "memory" && <MemoryManagerView />}
+          {activeView === "skills" && <SkillsManagerView />}
+          {activeView === "tasks" && <TaskDashboardView />}
+          {activeView === "approvals" && <ApprovalCentreView />}
+          {activeView === "integrations" && <IntegrationsView />}
+          {activeView === "models" && <ModelConfigView />}
+          {activeView === "workflows" && <ScheduledWorkflowsView />}
+          {activeView === "history" && <ExecutionHistoryView />}
         </main>
         {showInspector && (
           <>

@@ -1,7 +1,24 @@
 "use client";
 
 import clsx from "clsx";
-import { MoreHorizontal, PanelLeft, Pin, Plug, Plus, Search, Settings, X } from "lucide-react";
+import {
+  MoreHorizontal,
+  PanelLeft,
+  Pin,
+  Plug,
+  Plus,
+  Search,
+  Settings,
+  X,
+  Users,
+  Play,
+  Shield,
+  HardDrive,
+  BookOpen,
+  Cpu,
+  Calendar,
+  History,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/client/api";
 import { timeLabel } from "@/lib/client/format";
@@ -204,7 +221,7 @@ function SidebarFooter() {
 }
 
 export function Sidebar() {
-  const { state, setPanel, setSidebarOpen } = useApp();
+  const { state, setPanel, setSidebarOpen, activeView, setActiveView } = useApp();
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [newMenu, setNewMenu] = useState(false);
@@ -229,6 +246,18 @@ export function Sidebar() {
     const isPinned = (r: Row) => (r.kind === "room" ? r.room.pinned : r.bot.pinned);
     return matches.sort((a, b) => Number(isPinned(b)) - Number(isPinned(a)) || recency(b).localeCompare(recency(a)));
   }, [state.rooms, state.bots, state.summaries, query]);
+
+  const navItems = [
+    { id: "agents" as const, label: "Agent Workspace", icon: <Users size={15} /> },
+    { id: "tasks" as const, label: "Task Engine (DAG)", icon: <Play size={15} /> },
+    { id: "approvals" as const, label: "Approval Centre", icon: <Shield size={15} /> },
+    { id: "memory" as const, label: "Memory Manager", icon: <HardDrive size={15} /> },
+    { id: "skills" as const, label: "Skills & Playbooks", icon: <BookOpen size={15} /> },
+    { id: "integrations" as const, label: "Integrations Hub", icon: <Plug size={15} /> },
+    { id: "models" as const, label: "Model Intelligence", icon: <Cpu size={15} /> },
+    { id: "workflows" as const, label: "Scheduled Workflows", icon: <Calendar size={15} /> },
+    { id: "history" as const, label: "Execution History", icon: <History size={15} /> },
+  ];
 
   return (
     <nav aria-label="Bots and rooms" className="flex h-full w-full flex-col bg-side">
@@ -263,9 +292,40 @@ export function Sidebar() {
         </div>
       </header>
 
-      <div className="flex flex-col items-center pt-1 pb-5">
-        <Mascot color="#f4f4f4" size={60} />
-        <span className="mt-2 text-[14px] font-medium">OpenCrewBot</span>
+      <div className="flex flex-col items-center pt-1 pb-3">
+        <Mascot color="#f4f4f4" size={52} />
+        <span className="mt-1.5 text-[14px] font-semibold text-ink">OpenCrewBot</span>
+      </div>
+
+      {/* 12-Interface Operations Hub Navigation */}
+      <div className="px-2.5 pb-2.5 border-b border-line space-y-0.5">
+        <div className="px-2 pb-1 text-[10.5px] font-bold text-faint uppercase tracking-wider">
+          Workspaces & Operations
+        </div>
+        <div className="grid grid-cols-1 gap-0.5 max-h-48 overflow-y-auto pr-1">
+          {navItems.map((item) => {
+            const isCurrent = activeView === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveView(item.id)}
+                className={clsx(
+                  "flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-[13px] transition-colors",
+                  isCurrent
+                    ? "bg-active font-semibold text-ink ring-1 ring-line-strong"
+                    : "text-mute hover:bg-hover hover:text-ink",
+                )}
+              >
+                <span className={isCurrent ? "text-accent" : "text-faint"}>{item.icon}</span>
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="px-4.5 pt-3 pb-1 text-[10.5px] font-bold text-faint uppercase tracking-wider">
+        Conversations & Rooms
       </div>
 
       {searching && (

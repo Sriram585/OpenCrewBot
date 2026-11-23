@@ -22,7 +22,7 @@ export class SkillLoader {
   readonly dir: string;
 
   constructor(dir: string = SKILLS_DIR) {
-    this.dir = resolve(dir);
+    this.dir = resolve(/*turbopackIgnore: true*/ dir);
     this.ensureDir();
   }
 

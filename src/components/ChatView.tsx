@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { ArrowLeft, ArrowUp, AtSign, Eraser, MonitorPlay, MoreHorizontal, NotebookPen, PanelLeft, PanelRight, Plus, Square } from "lucide-react";
+import { ArrowLeft, ArrowUp, AtSign, Eraser, MonitorPlay, MoreHorizontal, NotebookPen, PanelLeft, PanelRight, Plus, Square, Users } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/client/api";
 import type { Bot, ChatMessage, Room } from "@/lib/shared/types";
@@ -9,6 +9,7 @@ import { useApp } from "./OpenCrewBotApp";
 import { MessageItem } from "./Message";
 import { Menu } from "./Sidebar";
 import { BotAvatar, IconButton, RoomAvatar } from "./ui";
+import { RoomCollaborationFeed } from "./RoomCollaborationFeed";
 
 function useClear(conversationId: string) {
   const { dispatch, toast } = useApp();
@@ -23,7 +24,21 @@ function useClear(conversationId: string) {
   };
 }
 
-function TopBar({ bot, room, members, running }: { bot?: Bot; room?: Room; members: Bot[]; running: string[] }) {
+function TopBar({
+  bot,
+  room,
+  members,
+  running,
+  showCollabFeed,
+  onToggleCollabFeed,
+}: {
+  bot?: Bot;
+  room?: Room;
+  members: Bot[];
+  running: string[];
+  showCollabFeed?: boolean;
+  onToggleCollabFeed?: () => void;
+}) {
   const { state, open, inspector, setInspector, sidebarOpen, setSidebarOpen } = useApp();
   const [menu, setMenu] = useState(false);
   const conversationId = bot ? `dm:${bot.id}` : `room:${room!.id}`;
@@ -59,6 +74,21 @@ function TopBar({ bot, room, members, running }: { bot?: Bot; room?: Room; membe
       </div>
 
       <div className="pointer-events-auto flex items-center gap-1">
+        {room && (
+          <button
+            onClick={onToggleCollabFeed}
+            className={clsx(
+              "flex h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium ring-1 transition-colors",
+              showCollabFeed
+                ? "bg-indigo-500/20 text-indigo-300 ring-indigo-500/40"
+                : "bg-raised/90 text-mute ring-line hover:bg-raised-2",
+            )}
+            title="Toggle Collaboration Feed & Interruption"
+          >
+            <Users size={15} />
+            <span className="hidden sm:inline">Collaboration Feed</span>
+          </button>
+        )}
         {browserBotId && (
           <button
             onClick={() => {
@@ -345,6 +375,7 @@ function shouldShowAuthor(messages: ChatMessage[], i: number, isRoom: boolean): 
 export function ChatView() {
   const { state, sidebarOpen, setSidebarOpen } = useApp();
   const [prefill, setPrefill] = useState<{ conversationId: string; text: string; n: number } | null>(null);
+  const [showCollabFeed, setShowCollabFeed] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const pinnedToBottom = useRef(true);
 
@@ -381,36 +412,51 @@ export function ChatView() {
   }
 
   return (
-    <div className="relative flex min-w-0 flex-1 flex-col">
-      <TopBar bot={bot} room={room} members={members} running={running} />
-      <div
-        ref={scroller}
-        onScroll={(e) => {
-          const el = e.currentTarget;
-          pinnedToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-        }}
-        className="min-h-0 flex-1 overflow-y-auto"
-      >
-        {messages === undefined ? (
-          <p className="px-6 pt-24 text-center text-sm text-mute">Loading messages…</p>
-        ) : messages.length === 0 ? (
-          <EmptyState bot={bot} room={room} members={members} onPick={(text) => setPrefill((p) => ({ conversationId: id, text, n: (p?.n ?? 0) + 1 }))} />
-        ) : (
-          <div className="mx-auto max-w-[780px] space-y-4 px-4 pt-20 pb-6">
-            {messages.map((m, i) => (
-              <MessageItem key={m.id} message={m} bot={state.bots.find((b) => b.id === m.botId)} showAuthor={shouldShowAuthor(messages, i, Boolean(room))} />
-            ))}
-          </div>
-        )}
+    <div className="relative flex min-w-0 flex-1 flex-row h-full">
+      <div className="relative flex min-w-0 flex-1 flex-col h-full">
+        <TopBar
+          bot={bot}
+          room={room}
+          members={members}
+          running={running}
+          showCollabFeed={showCollabFeed}
+          onToggleCollabFeed={() => setShowCollabFeed((v) => !v)}
+        />
+        <div
+          ref={scroller}
+          onScroll={(e) => {
+            const el = e.currentTarget;
+            pinnedToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+          }}
+          className="min-h-0 flex-1 overflow-y-auto"
+        >
+          {messages === undefined ? (
+            <p className="px-6 pt-24 text-center text-sm text-mute">Loading messages…</p>
+          ) : messages.length === 0 ? (
+            <EmptyState bot={bot} room={room} members={members} onPick={(text) => setPrefill((p) => ({ conversationId: id, text, n: (p?.n ?? 0) + 1 }))} />
+          ) : (
+            <div className="mx-auto max-w-[780px] space-y-4 px-4 pt-20 pb-6">
+              {messages.map((m, i) => (
+                <MessageItem key={m.id} message={m} bot={state.bots.find((b) => b.id === m.botId)} showAuthor={shouldShowAuthor(messages, i, Boolean(room))} />
+              ))}
+            </div>
+          )}
+        </div>
+        <Composer
+          key={`${id}:${prefill?.conversationId === id ? prefill.n : 0}`}
+          conversationId={id}
+          name={bot?.name ?? room?.name ?? ""}
+          members={members}
+          running={running.length > 0}
+          prefill={prefill?.conversationId === id ? prefill.text : undefined}
+        />
       </div>
-      <Composer
-        key={`${id}:${prefill?.conversationId === id ? prefill.n : 0}`}
-        conversationId={id}
-        name={bot?.name ?? room?.name ?? ""}
-        members={members}
-        running={running.length > 0}
-        prefill={prefill?.conversationId === id ? prefill.text : undefined}
-      />
+      {room && showCollabFeed && (
+        <RoomCollaborationFeed
+          roomId={room.id}
+          onClose={() => setShowCollabFeed(false)}
+        />
+      )}
     </div>
   );
 }
