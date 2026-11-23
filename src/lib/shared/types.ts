@@ -117,6 +117,36 @@ export interface RoomCollaborationMessage {
   createdAt: string;
 }
 
+// Module I: Scheduled AI Workflows Types
+export type WorkflowStatus = "ACTIVE" | "PAUSED";
+export type WorkflowTriggerType = "SCHEDULED" | "MANUAL";
+
+export interface ScheduledWorkflow {
+  id: string;
+  name: string;
+  description?: string | null;
+  roomId?: string | null;
+  goalPrompt: string;
+  cronExpression: string;
+  status: WorkflowStatus;
+  lastRunAt?: string | null;
+  nextRunAt?: string | null;
+  lastStatus?: string | null;
+  lastError?: string | null;
+  createdAt: string;
+}
+
+export interface WorkflowRunRecord {
+  id: string;
+  workflowId: string;
+  runId?: string | null;
+  triggerType: WorkflowTriggerType;
+  status: string;
+  startedAt: string;
+  completedAt?: string | null;
+  error?: string | null;
+}
+
 /** `dm:<botId>` or `room:<roomId>`. */
 export type ConversationId = string;
 

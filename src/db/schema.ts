@@ -1,7 +1,7 @@
 // Local SQLite database schema definitions and migrations.
 import type { Client } from "@libsql/client";
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 export const SCHEMA_STATEMENTS = [
   "CREATE TABLE IF NOT EXISTS bots (id TEXT PRIMARY KEY, data TEXT NOT NULL)",
@@ -116,6 +116,32 @@ export const SCHEMA_STATEMENTS = [
   )`,
   "CREATE INDEX IF NOT EXISTS idx_collab_room_time ON room_collaboration_messages (room_id, created_at)",
   "CREATE INDEX IF NOT EXISTS idx_collab_run_time ON room_collaboration_messages (run_id, created_at)",
+  `CREATE TABLE IF NOT EXISTS scheduled_workflows (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    room_id TEXT,
+    goal_prompt TEXT NOT NULL,
+    cron_expression TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('ACTIVE', 'PAUSED')),
+    last_run_at TEXT,
+    next_run_at TEXT,
+    last_status TEXT,
+    last_error TEXT,
+    created_at TEXT NOT NULL
+  )`,
+  "CREATE INDEX IF NOT EXISTS idx_scheduled_workflows_status ON scheduled_workflows (status)",
+  `CREATE TABLE IF NOT EXISTS workflow_runs (
+    id TEXT PRIMARY KEY,
+    workflow_id TEXT NOT NULL,
+    run_id TEXT,
+    trigger_type TEXT NOT NULL CHECK(trigger_type IN ('SCHEDULED', 'MANUAL')),
+    status TEXT NOT NULL,
+    started_at TEXT NOT NULL,
+    completed_at TEXT,
+    error TEXT
+  )`,
+  "CREATE INDEX IF NOT EXISTS idx_workflow_runs_workflow ON workflow_runs (workflow_id, started_at)",
 ];
 
 export async function initSchema(client: Client): Promise<void> {

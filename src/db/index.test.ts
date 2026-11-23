@@ -43,6 +43,12 @@ import {
   getRunDetails,
   createCollaborationMessage,
   listCollaborationMessages,
+  createScheduledWorkflow,
+  getScheduledWorkflow,
+  updateScheduledWorkflow,
+  listScheduledWorkflows,
+  createWorkflowRun,
+  listWorkflowRuns,
 } from "./index";
 import type { Client } from "@libsql/client";
 import type { Bot, ChatMessage, Room } from "@/lib/shared/types";
@@ -491,6 +497,47 @@ describe("SQLite Database Module (src/db)", () => {
       expect(messages[0].messageType).toBe("DELEGATE");
       expect(messages[0].metadata).toEqual({ priority: "high" });
       expect(messages[1].messageType).toBe("RESULT");
+    });
+  });
+
+  describe("Scheduled Workflows (Module I)", () => {
+    it("creates, retrieves, updates, and tracks workflow runs", async () => {
+      await createScheduledWorkflow(
+        {
+          id: "wf-test-1",
+          name: "Daily Market Brief",
+          goalPrompt: "Analyze daily market trends and competitors",
+          cronExpression: "0 9 * * *",
+          status: "ACTIVE",
+        },
+        client,
+      );
+
+      const wf = await getScheduledWorkflow("wf-test-1", client);
+      expect(wf).not.toBeNull();
+      expect(wf?.name).toBe("Daily Market Brief");
+      expect(wf?.status).toBe("ACTIVE");
+
+      await updateScheduledWorkflow("wf-test-1", { status: "PAUSED" }, client);
+      const paused = await getScheduledWorkflow("wf-test-1", client);
+      expect(paused?.status).toBe("PAUSED");
+
+      await createWorkflowRun(
+        {
+          id: "run-wf-1",
+          workflowId: "wf-test-1",
+          triggerType: "MANUAL",
+          status: "COMPLETED",
+          startedAt: "2026-01-01T09:00:00Z",
+          completedAt: "2026-01-01T09:00:05Z",
+        },
+        client,
+      );
+
+      const history = await listWorkflowRuns("wf-test-1", 10, client);
+      expect(history).toHaveLength(1);
+      expect(history[0].triggerType).toBe("MANUAL");
+      expect(history[0].status).toBe("COMPLETED");
     });
   });
 });

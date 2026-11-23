@@ -12,12 +12,27 @@ import type {
   TaskStatus,
   CollaborationMessageType,
   RoomCollaborationMessage,
+  ScheduledWorkflow,
+  WorkflowRunRecord,
+  WorkflowStatus,
+  WorkflowTriggerType,
 } from "@/lib/shared/types";
 import { getClient, openClient, closeClient } from "./client";
 import { initSchema, SCHEMA_VERSION } from "./schema";
 
 export { getClient, openClient, closeClient, initSchema, SCHEMA_VERSION };
-export type { Run, RunStatus, Task, TaskStatus, CollaborationMessageType, RoomCollaborationMessage };
+export type {
+  Run,
+  RunStatus,
+  Task,
+  TaskStatus,
+  CollaborationMessageType,
+  RoomCollaborationMessage,
+  ScheduledWorkflow,
+  WorkflowRunRecord,
+  WorkflowStatus,
+  WorkflowTriggerType,
+};
 
 export function db(): Promise<Client> {
   return getClient();
@@ -1034,4 +1049,226 @@ export async function listCollaborationMessages(
       createdAt: String(r.created_at),
     };
   });
+}
+
+// ── scheduled workflows & runs (Module I: Scheduled AI Workflows) ──────
+
+export interface ScheduledWorkflowInput {
+  id: string;
+  name: string;
+  description?: string | null;
+  roomId?: string | null;
+  goalPrompt: string;
+  cronExpression: string;
+  status?: WorkflowStatus;
+  lastRunAt?: string | null;
+  nextRunAt?: string | null;
+  lastStatus?: string | null;
+  lastError?: string | null;
+  createdAt?: string;
+}
+
+export async function createScheduledWorkflow(
+  workflow: ScheduledWorkflowInput,
+  client?: Client,
+): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({
+    sql: `INSERT INTO scheduled_workflows (
+            id, name, description, room_id, goal_prompt, cron_expression, status, last_run_at, next_run_at, last_status, last_error, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            name = excluded.name,
+            description = excluded.description,
+            room_id = excluded.room_id,
+            goal_prompt = excluded.goal_prompt,
+            cron_expression = excluded.cron_expression,
+            status = excluded.status,
+            last_run_at = excluded.last_run_at,
+            next_run_at = excluded.next_run_at,
+            last_status = excluded.last_status,
+            last_error = excluded.last_error`,
+    args: [
+      workflow.id,
+      workflow.name,
+      workflow.description ?? null,
+      workflow.roomId ?? null,
+      workflow.goalPrompt,
+      workflow.cronExpression,
+      workflow.status || "ACTIVE",
+      workflow.lastRunAt ?? null,
+      workflow.nextRunAt ?? null,
+      workflow.lastStatus ?? null,
+      workflow.lastError ?? null,
+      workflow.createdAt || new Date().toISOString(),
+    ],
+  });
+}
+
+export async function getScheduledWorkflow(id: string, client?: Client): Promise<ScheduledWorkflow | null> {
+  const c = client ?? (await db());
+  const res = await c.execute({
+    sql: "SELECT * FROM scheduled_workflows WHERE id = ?",
+    args: [id],
+  });
+  const r = res.rows[0];
+  if (!r) return null;
+  return {
+    id: String(r.id),
+    name: String(r.name),
+    description: r.description ? String(r.description) : null,
+    roomId: r.room_id ? String(r.room_id) : null,
+    goalPrompt: String(r.goal_prompt),
+    cronExpression: String(r.cron_expression),
+    status: r.status as WorkflowStatus,
+    lastRunAt: r.last_run_at ? String(r.last_run_at) : null,
+    nextRunAt: r.next_run_at ? String(r.next_run_at) : null,
+    lastStatus: r.last_status ? String(r.last_status) : null,
+    lastError: r.last_error ? String(r.last_error) : null,
+    createdAt: String(r.created_at),
+  };
+}
+
+export async function updateScheduledWorkflow(
+  id: string,
+  patch: Partial<ScheduledWorkflow>,
+  client?: Client,
+): Promise<void> {
+  const c = client ?? (await db());
+  const existing = await getScheduledWorkflow(id, c);
+  if (!existing) throw new Error(`Scheduled workflow ${id} not found`);
+
+  const updated: ScheduledWorkflow = { ...existing, ...patch };
+  await c.execute({
+    sql: `UPDATE scheduled_workflows SET
+            name = ?, description = ?, room_id = ?, goal_prompt = ?, cron_expression = ?,
+            status = ?, last_run_at = ?, next_run_at = ?, last_status = ?, last_error = ?
+          WHERE id = ?`,
+    args: [
+      updated.name,
+      updated.description ?? null,
+      updated.roomId ?? null,
+      updated.goalPrompt,
+      updated.cronExpression,
+      updated.status,
+      updated.lastRunAt ?? null,
+      updated.nextRunAt ?? null,
+      updated.lastStatus ?? null,
+      updated.lastError ?? null,
+      id,
+    ],
+  });
+}
+
+export async function listScheduledWorkflows(
+  filter?: { status?: WorkflowStatus; roomId?: string },
+  client?: Client,
+): Promise<ScheduledWorkflow[]> {
+  const c = client ?? (await db());
+  const conditions: string[] = [];
+  const args: (string | number)[] = [];
+
+  if (filter?.status) {
+    conditions.push("status = ?");
+    args.push(filter.status);
+  }
+  if (filter?.roomId) {
+    conditions.push("room_id = ?");
+    args.push(filter.roomId);
+  }
+
+  const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const res = await c.execute({
+    sql: `SELECT * FROM scheduled_workflows ${whereClause} ORDER BY created_at DESC`,
+    args,
+  });
+
+  return res.rows.map((r) => ({
+    id: String(r.id),
+    name: String(r.name),
+    description: r.description ? String(r.description) : null,
+    roomId: r.room_id ? String(r.room_id) : null,
+    goalPrompt: String(r.goal_prompt),
+    cronExpression: String(r.cron_expression),
+    status: r.status as WorkflowStatus,
+    lastRunAt: r.last_run_at ? String(r.last_run_at) : null,
+    nextRunAt: r.next_run_at ? String(r.next_run_at) : null,
+    lastStatus: r.last_status ? String(r.last_status) : null,
+    lastError: r.last_error ? String(r.last_error) : null,
+    createdAt: String(r.created_at),
+  }));
+}
+
+export async function deleteScheduledWorkflow(id: string, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({ sql: "DELETE FROM scheduled_workflows WHERE id = ?", args: [id] });
+  await c.execute({ sql: "DELETE FROM workflow_runs WHERE workflow_id = ?", args: [id] });
+}
+
+export async function createWorkflowRun(record: WorkflowRunRecord, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({
+    sql: `INSERT INTO workflow_runs (id, workflow_id, run_id, trigger_type, status, started_at, completed_at, error)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      record.id,
+      record.workflowId,
+      record.runId ?? null,
+      record.triggerType,
+      record.status,
+      record.startedAt,
+      record.completedAt ?? null,
+      record.error ?? null,
+    ],
+  });
+}
+
+export async function updateWorkflowRun(
+  id: string,
+  patch: Partial<WorkflowRunRecord>,
+  client?: Client,
+): Promise<void> {
+  const c = client ?? (await db());
+  const res = await c.execute({ sql: "SELECT * FROM workflow_runs WHERE id = ?", args: [id] });
+  const r = res.rows[0];
+  if (!r) throw new Error(`Workflow run ${id} not found`);
+
+  const updated: WorkflowRunRecord = {
+    id: String(r.id),
+    workflowId: String(r.workflow_id),
+    runId: r.run_id ? String(r.run_id) : null,
+    triggerType: r.trigger_type as WorkflowTriggerType,
+    status: String(r.status),
+    startedAt: String(r.started_at),
+    completedAt: r.completed_at ? String(r.completed_at) : null,
+    error: r.error ? String(r.error) : null,
+    ...patch,
+  };
+
+  await c.execute({
+    sql: `UPDATE workflow_runs SET status = ?, completed_at = ?, error = ? WHERE id = ?`,
+    args: [updated.status, updated.completedAt ?? null, updated.error ?? null, id],
+  });
+}
+
+export async function listWorkflowRuns(
+  workflowId: string,
+  limit = 50,
+  client?: Client,
+): Promise<WorkflowRunRecord[]> {
+  const c = client ?? (await db());
+  const res = await c.execute({
+    sql: "SELECT * FROM workflow_runs WHERE workflow_id = ? ORDER BY started_at DESC LIMIT ?",
+    args: [workflowId, limit],
+  });
+  return res.rows.map((r) => ({
+    id: String(r.id),
+    workflowId: String(r.workflow_id),
+    runId: r.run_id ? String(r.run_id) : null,
+    triggerType: r.trigger_type as WorkflowTriggerType,
+    status: String(r.status),
+    startedAt: String(r.started_at),
+    completedAt: r.completed_at ? String(r.completed_at) : null,
+    error: r.error ? String(r.error) : null,
+  }));
 }
