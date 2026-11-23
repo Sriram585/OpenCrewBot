@@ -1,7 +1,17 @@
 import type { Bot } from "@/lib/shared/types";
-import { memoryForPrompt } from "./memory-files";
+import { memoryService } from "./memory";
 
-export function systemPrompt(bot: Bot, capabilities: string[], toolInstructions: string[]): string {
+export interface SystemPromptContext {
+  roomId?: string;
+  projectId?: string;
+}
+
+export function systemPrompt(
+  bot: Bot,
+  capabilities: string[],
+  toolInstructions: string[],
+  context?: SystemPromptContext,
+): string {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const sections: string[] = [];
 
@@ -26,17 +36,25 @@ export function systemPrompt(bot: Bot, capabilities: string[], toolInstructions:
   if (capabilities.length) sections.push(`## What you can do\n${capabilities.map((c) => `- ${c}`).join("\n")}`);
 
   if (bot.tools.memory) {
-    const { text, truncated } = memoryForPrompt(bot.id);
     sections.push(
       [
-        "## Your memory (MEMORY.md)",
-        "These are your own notes from earlier conversations. Use them; don't recite them.",
-        "Save durable facts with memory_add (preferences, decisions, ongoing projects). Fix or remove stale lines with memory_edit. Never store passwords or keys.",
-        "",
-        text || "(empty so far)",
-        truncated ? "\n(MEMORY.md is longer than this; older lines are cut off. Tidy it with memory_edit.)" : "",
+        "## Memory Instructions",
+        "You have access to persistent Markdown memory across scopes (agent, shared room, project, user preferences, decisions, and tasks).",
+        "Memory entries follow the provenance format:",
+        "`- [<ISO_TIMESTAMP>] | Source: <user|agentId|taskId> | Reason: <why remembered> | Content: <fact>`",
+        "Save durable facts with memory_add. Fix or remove stale lines with memory_edit. Never store passwords or keys.",
       ].join("\n"),
     );
+
+    // Live disk read of relevant scoped memories (agent + room + project + user preferences + decisions/tasks)
+    const promptMemoryContext = memoryService.getPromptContext({
+      agentId: bot.id,
+      roomId: context?.roomId,
+      projectId: context?.projectId,
+    });
+    if (promptMemoryContext) {
+      sections.push(promptMemoryContext);
+    }
   }
 
   sections.push(...toolInstructions);

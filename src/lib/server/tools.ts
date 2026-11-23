@@ -8,6 +8,7 @@ import { QuickJsCodeModeTransport } from "@mastra/quickjs";
 import { z } from "zod";
 import type { Bot, Source } from "@/lib/shared/types";
 import { appendMemory, editMemory } from "./memory-files";
+import { memoryService } from "./memory";
 import { publish } from "./bus";
 import { keys } from "./config";
 import { mcpServerNames } from "./connectors";
@@ -19,13 +20,22 @@ function memoryTools(botId: string): ToolsInput {
     memory_add: createTool({
       id: "memory_add",
       description:
-        "Save one durable fact to your MEMORY.md (a preference, a decision, something about the person or your ongoing work). One short line per call.",
+        "Save one durable fact to persistent memory with provenance tracking (preferences, decisions, ongoing work).",
       inputSchema: z.object({
         note: z.string().min(1).describe("The fact, as one short sentence."),
-        section: z.string().optional().describe("Optional heading to file it under, e.g. 'About the person' or 'Projects'."),
+        scope: z.enum(["agent", "room", "project", "user", "decisions", "tasks"]).optional().describe("Memory scope (defaults to agent)."),
+        scopeId: z.string().optional().describe("Identifier for room/project scope if applicable."),
+        reason: z.string().optional().describe("Why this should be remembered."),
+        section: z.string().optional().describe("Optional heading to file it under."),
       }),
-      execute: async ({ note, section }) => {
-        appendMemory(botId, note, section);
+      execute: async ({ note, scope, scopeId, reason, section }) => {
+        const targetScope = scope || "agent";
+        const targetId = scopeId || (targetScope === "agent" ? botId : undefined);
+        memoryService.appendEntry(targetScope, targetId, {
+          content: note,
+          reason: reason || section || "Observation or user request",
+          source: botId,
+        });
         publish({ type: "memory-changed", botId });
         return { saved: true };
       },
@@ -33,10 +43,17 @@ function memoryTools(botId: string): ToolsInput {
     memory_edit: createTool({
       id: "memory_edit",
       description:
-        "Fix or remove a line in your MEMORY.md. `find` must match the current text exactly once; use an empty `replace` to delete it.",
-      inputSchema: z.object({ find: z.string().min(1), replace: z.string() }),
-      execute: async ({ find, replace }) => {
-        const result = editMemory(botId, find, replace);
+        "Fix or remove a line in memory. `find` must match the current text exactly once; use an empty `replace` to delete it.",
+      inputSchema: z.object({
+        find: z.string().min(1),
+        replace: z.string(),
+        scope: z.enum(["agent", "room", "project", "user", "decisions", "tasks"]).optional(),
+        scopeId: z.string().optional(),
+      }),
+      execute: async ({ find, replace, scope, scopeId }) => {
+        const targetScope = scope || "agent";
+        const targetId = scopeId || (targetScope === "agent" ? botId : undefined);
+        const result = memoryService.editFile(targetScope, targetId, find, replace);
         if (result.ok) publish({ type: "memory-changed", botId });
         return result;
       },

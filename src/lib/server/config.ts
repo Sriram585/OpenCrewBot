@@ -5,7 +5,9 @@ import type { AppStatus } from "@/lib/shared/types";
 // The data folder is chosen at runtime, so keep the bundler from tracing it.
 export const DATA_DIR = resolve(/*turbopackIgnore: true*/ process.env.OPENCREWBOT_DATA_DIR || "./data");
 export const WORKSPACES_DIR = resolve(DATA_DIR, "workspaces");
+export const MEMORY_DIR = resolve(DATA_DIR, "memory");
 mkdirSync(WORKSPACES_DIR, { recursive: true });
+mkdirSync(MEMORY_DIR, { recursive: true });
 
 // The app was called CrewRoom before; carry an existing database over once.
 const APP_DB_PATH = resolve(DATA_DIR, "opencrewbot.db");
