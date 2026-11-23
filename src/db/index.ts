@@ -1,12 +1,23 @@
 // Local SQLite database module for OpenCrewBot.
 // Manages local persistence for bots, rooms, messages, settings, agent model configs, and model usage logs.
 import type { Client } from "@libsql/client";
-import type { Bot, ChatMessage, ConversationId, Room, Run, RunStatus, Task, TaskStatus } from "@/lib/shared/types";
+import type {
+  Bot,
+  ChatMessage,
+  ConversationId,
+  Room,
+  Run,
+  RunStatus,
+  Task,
+  TaskStatus,
+  CollaborationMessageType,
+  RoomCollaborationMessage,
+} from "@/lib/shared/types";
 import { getClient, openClient, closeClient } from "./client";
 import { initSchema, SCHEMA_VERSION } from "./schema";
 
 export { getClient, openClient, closeClient, initSchema, SCHEMA_VERSION };
-export type { Run, RunStatus, Task, TaskStatus };
+export type { Run, RunStatus, Task, TaskStatus, CollaborationMessageType, RoomCollaborationMessage };
 
 export function db(): Promise<Client> {
   return getClient();
@@ -933,4 +944,94 @@ export async function getRunDetails(
   if (!run) return null;
   const tasks = await listTasksByRun(runId, c);
   return { run, tasks };
+}
+
+// ── room collaboration messages (Module C: Multi-Agent Collaboration) ──
+
+export interface RoomCollaborationMessageInput {
+  id?: string;
+  roomId: string;
+  runId?: string | null;
+  senderAgentId: string;
+  recipientAgentId?: string | null;
+  messageType: CollaborationMessageType;
+  content: string;
+  metadata?: Record<string, unknown> | null;
+  createdAt?: string;
+}
+
+export async function createCollaborationMessage(
+  msg: RoomCollaborationMessageInput,
+  client?: Client,
+): Promise<void> {
+  const c = client ?? (await db());
+  const id =
+    msg.id ||
+    (typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `collab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+
+  await c.execute({
+    sql: `INSERT INTO room_collaboration_messages (
+            id, room_id, run_id, sender_agent_id, recipient_agent_id, message_type, content, metadata_json, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      id,
+      msg.roomId,
+      msg.runId ?? null,
+      msg.senderAgentId,
+      msg.recipientAgentId ?? null,
+      msg.messageType,
+      msg.content,
+      msg.metadata ? JSON.stringify(msg.metadata) : null,
+      msg.createdAt || new Date().toISOString(),
+    ],
+  });
+}
+
+export async function listCollaborationMessages(
+  roomId: string,
+  options?: { runId?: string; limit?: number },
+  client?: Client,
+): Promise<RoomCollaborationMessage[]> {
+  const c = client ?? (await db());
+  const limit = options?.limit ?? 100;
+  const conditions = ["room_id = ?"];
+  const args: (string | number)[] = [roomId];
+
+  if (options?.runId) {
+    conditions.push("run_id = ?");
+    args.push(options.runId);
+  }
+
+  const whereClause = `WHERE ${conditions.join(" AND ")}`;
+  args.push(limit);
+
+  const res = await c.execute({
+    sql: `SELECT id, room_id, run_id, sender_agent_id, recipient_agent_id, message_type, content, metadata_json, created_at
+          FROM room_collaboration_messages ${whereClause} ORDER BY created_at ASC LIMIT ?`,
+    args,
+  });
+
+  return res.rows.map((r) => {
+    let metadata: Record<string, unknown> | null = null;
+    if (r.metadata_json) {
+      try {
+        metadata = JSON.parse(String(r.metadata_json)) as Record<string, unknown>;
+      } catch {
+        metadata = null;
+      }
+    }
+    return {
+      id: String(r.id),
+      roomId: String(r.room_id),
+      runId: r.run_id ? String(r.run_id) : null,
+      senderAgentId: String(r.sender_agent_id),
+      recipientAgentId: r.recipient_agent_id ? String(r.recipient_agent_id) : null,
+      messageType: r.message_type as CollaborationMessageType,
+      content: String(r.content),
+      metadata,
+      createdAt: String(r.created_at),
+    };
+  });
 }

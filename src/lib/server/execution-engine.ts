@@ -198,17 +198,18 @@ export class ExecutionEngine {
       }
 
       const tasks = await listTasksByRun(runId, client);
+      const activeTasks = tasks.filter((t) => t.status !== "CANCELLED");
       const taskMap = new Map(tasks.map((t) => [t.id, t]));
 
       // Check if any task is WAITING_APPROVAL
-      const waitingApprovalTask = tasks.find((t) => t.status === "WAITING_APPROVAL");
+      const waitingApprovalTask = activeTasks.find((t) => t.status === "WAITING_APPROVAL");
       if (waitingApprovalTask) {
         await updateRun(runId, { status: "WAITING_APPROVAL" }, client);
         return (await getRun(runId, client))!;
       }
 
-      // Check if any task is FAILED (cannot retry)
-      const failedTask = tasks.find((t) => t.status === "FAILED");
+      // Check if any active task is FAILED (cannot retry)
+      const failedTask = activeTasks.find((t) => t.status === "FAILED");
       if (failedTask) {
         const error = `Task "${failedTask.title}" (${failedTask.id}) failed: ${failedTask.error || "Unknown error"}`;
         await updateRun(
@@ -223,11 +224,11 @@ export class ExecutionEngine {
         return (await getRun(runId, client))!;
       }
 
-      // Check if all tasks are COMPLETED
-      const allCompleted = tasks.every((t) => t.status === "COMPLETED");
-      if (tasks.length > 0 && allCompleted) {
-        // Build final output from all completed task outputs
-        const outputs = tasks.map((t) => `### ${t.title}\n${t.output || "No output"}`).join("\n\n");
+      // Check if all active tasks are COMPLETED
+      const allCompleted = activeTasks.length > 0 && activeTasks.every((t) => t.status === "COMPLETED");
+      if (allCompleted) {
+        // Build final output from all completed active task outputs
+        const outputs = activeTasks.map((t) => `### ${t.title}\n${t.output || "No output"}`).join("\n\n");
         await updateRun(
           runId,
           {
@@ -241,7 +242,7 @@ export class ExecutionEngine {
       }
 
       // Find ready tasks: PENDING tasks whose dependencies are all COMPLETED
-      const readyTasks = tasks.filter((t) => {
+      const readyTasks = activeTasks.filter((t) => {
         if (t.status !== "PENDING") return false;
         if (!t.dependencies || t.dependencies.length === 0) return true;
         return t.dependencies.every((depId) => {
@@ -250,8 +251,8 @@ export class ExecutionEngine {
         });
       });
 
-      // Deadlock check: tasks exist, not all completed, but no tasks ready and none running
-      const runningTasks = tasks.filter((t) => t.status === "RUNNING");
+      // Deadlock check: active tasks exist, not all completed, but no tasks ready and none running
+      const runningTasks = activeTasks.filter((t) => t.status === "RUNNING");
       if (readyTasks.length === 0 && runningTasks.length === 0) {
         const error = "Deadlock detected: pending tasks have unfulfilled or circular dependencies.";
         await updateRun(

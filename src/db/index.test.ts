@@ -41,6 +41,8 @@ import {
   updateTask,
   listTasksByRun,
   getRunDetails,
+  createCollaborationMessage,
+  listCollaborationMessages,
 } from "./index";
 import type { Client } from "@libsql/client";
 import type { Bot, ChatMessage, Room } from "@/lib/shared/types";
@@ -454,6 +456,41 @@ describe("SQLite Database Module (src/db)", () => {
       expect(details).not.toBeNull();
       expect(details?.run.id).toBe("run-db-2");
       expect(details?.tasks).toHaveLength(2);
+    });
+
+    it("creates and lists room collaboration messages", async () => {
+      await createCollaborationMessage(
+        {
+          id: "collab-msg-1",
+          roomId: "room-marketing",
+          runId: "run-db-10",
+          senderAgentId: "agent-chief-of-staff",
+          recipientAgentId: "agent-market-researcher",
+          messageType: "DELEGATE",
+          content: "Please investigate competitor pricing tiers.",
+          metadata: { priority: "high" },
+        },
+        client,
+      );
+
+      await createCollaborationMessage(
+        {
+          id: "collab-msg-2",
+          roomId: "room-marketing",
+          runId: "run-db-10",
+          senderAgentId: "agent-market-researcher",
+          recipientAgentId: "agent-chief-of-staff",
+          messageType: "RESULT",
+          content: "Found 3 competitor tiers starting at $49/mo.",
+        },
+        client,
+      );
+
+      const messages = await listCollaborationMessages("room-marketing", undefined, client);
+      expect(messages).toHaveLength(2);
+      expect(messages[0].messageType).toBe("DELEGATE");
+      expect(messages[0].metadata).toEqual({ priority: "high" });
+      expect(messages[1].messageType).toBe("RESULT");
     });
   });
 });

@@ -1,7 +1,7 @@
 // Local SQLite database schema definitions and migrations.
 import type { Client } from "@libsql/client";
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export const SCHEMA_STATEMENTS = [
   "CREATE TABLE IF NOT EXISTS bots (id TEXT PRIMARY KEY, data TEXT NOT NULL)",
@@ -103,6 +103,19 @@ export const SCHEMA_STATEMENTS = [
   )`,
   "CREATE INDEX IF NOT EXISTS idx_tasks_run_id ON tasks (run_id)",
   "CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks (status)",
+  `CREATE TABLE IF NOT EXISTS room_collaboration_messages (
+    id TEXT PRIMARY KEY,
+    room_id TEXT NOT NULL,
+    run_id TEXT,
+    sender_agent_id TEXT NOT NULL,
+    recipient_agent_id TEXT,
+    message_type TEXT NOT NULL CHECK(message_type IN ('DELEGATE', 'QUESTION', 'SHARE', 'CHALLENGE', 'VERIFY', 'RESULT', 'INTERRUPT')),
+    content TEXT NOT NULL,
+    metadata_json TEXT,
+    created_at TEXT NOT NULL
+  )`,
+  "CREATE INDEX IF NOT EXISTS idx_collab_room_time ON room_collaboration_messages (room_id, created_at)",
+  "CREATE INDEX IF NOT EXISTS idx_collab_run_time ON room_collaboration_messages (run_id, created_at)",
 ];
 
 export async function initSchema(client: Client): Promise<void> {

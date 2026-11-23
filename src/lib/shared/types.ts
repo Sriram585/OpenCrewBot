@@ -95,6 +95,28 @@ export interface Task {
   completedAt?: string | null;
 }
 
+// Module C: Multi-Agent Collaboration Types
+export type CollaborationMessageType =
+  | "DELEGATE"
+  | "QUESTION"
+  | "SHARE"
+  | "CHALLENGE"
+  | "VERIFY"
+  | "RESULT"
+  | "INTERRUPT";
+
+export interface RoomCollaborationMessage {
+  id: string;
+  roomId: string;
+  runId?: string | null;
+  senderAgentId: string;
+  recipientAgentId?: string | null;
+  messageType: CollaborationMessageType;
+  content: string;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+}
+
 /** `dm:<botId>` or `room:<roomId>`. */
 export type ConversationId = string;
 

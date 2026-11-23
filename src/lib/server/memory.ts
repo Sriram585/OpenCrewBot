@@ -126,9 +126,19 @@ export class MemoryService {
     this.ensureDirs();
     const path = this.resolveFilePath(scope, id);
     const clean = redactSecrets(content);
-    const tmp = `${path}.${process.pid}.${Date.now()}.tmp`;
+    const tmp = `${path}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2, 6)}.tmp`;
     writeFileSync(tmp, clean, { mode: 0o600 });
-    renameSync(tmp, path);
+    try {
+      renameSync(tmp, path);
+    } catch {
+      // Windows / OneDrive fallback when atomic rename over an existing file is locked
+      writeFileSync(path, clean, { mode: 0o600 });
+      try {
+        rmSync(tmp, { force: true });
+      } catch {
+        // ignore
+      }
+    }
 
     // If writing agent memory, also update legacy workspace for backwards compatibility
     if (scope === "agent" && id) {
