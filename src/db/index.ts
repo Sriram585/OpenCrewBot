@@ -407,3 +407,250 @@ export async function getModelUsageSummary(
 
   return summary;
 }
+
+// ── approvals & audit logs (Module G) ──────────────────────────────────
+
+export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+export type ToolRiskLevel = "read_safe" | "external_write" | "sensitive";
+export type AuditDecision = "AUTO_ALLOWED" | "APPROVED" | "REJECTED" | "CANCELLED" | "BLOCKED";
+
+export interface ApprovalRequest {
+  id: string;
+  taskId: string | null;
+  runId: string | null;
+  agentId: string | null;
+  toolName: string;
+  riskLevel: ToolRiskLevel | string;
+  actionPreviewJson: string;
+  status: ApprovalStatus;
+  createdAt: string;
+  resolvedAt: string | null;
+  resolvedBy: string | null;
+  decisionNote: string | null;
+}
+
+export interface ApprovalRequestInput {
+  id: string;
+  taskId?: string | null;
+  runId?: string | null;
+  agentId?: string | null;
+  toolName: string;
+  riskLevel: ToolRiskLevel | string;
+  actionPreviewJson: string;
+  status?: ApprovalStatus;
+  createdAt?: string;
+  resolvedAt?: string | null;
+  resolvedBy?: string | null;
+  decisionNote?: string | null;
+}
+
+export interface AuditLog {
+  id: string;
+  timestamp: string;
+  agentId: string | null;
+  taskId: string | null;
+  toolName: string;
+  permissionLevel: string;
+  decision: AuditDecision;
+  actionPreviewJson: string;
+  resultSummary: string | null;
+  error: string | null;
+}
+
+export interface AuditLogInput {
+  id?: string;
+  timestamp?: string;
+  agentId?: string | null;
+  taskId?: string | null;
+  toolName: string;
+  permissionLevel: string;
+  decision: AuditDecision;
+  actionPreviewJson: string;
+  resultSummary?: string | null;
+  error?: string | null;
+}
+
+export async function createApprovalRequest(req: ApprovalRequestInput, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({
+    sql: `INSERT INTO approval_requests (
+            id, task_id, run_id, agent_id, tool_name, risk_level, action_preview_json, status, created_at, resolved_at, resolved_by, decision_note
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            task_id = excluded.task_id,
+            run_id = excluded.run_id,
+            agent_id = excluded.agent_id,
+            tool_name = excluded.tool_name,
+            risk_level = excluded.risk_level,
+            action_preview_json = excluded.action_preview_json,
+            status = excluded.status,
+            resolved_at = excluded.resolved_at,
+            resolved_by = excluded.resolved_by,
+            decision_note = excluded.decision_note`,
+    args: [
+      req.id,
+      req.taskId ?? null,
+      req.runId ?? null,
+      req.agentId ?? null,
+      req.toolName,
+      req.riskLevel,
+      req.actionPreviewJson,
+      req.status || "PENDING",
+      req.createdAt || new Date().toISOString(),
+      req.resolvedAt ?? null,
+      req.resolvedBy ?? null,
+      req.decisionNote ?? null,
+    ],
+  });
+}
+
+export async function getApprovalRequest(id: string, client?: Client): Promise<ApprovalRequest | null> {
+  const c = client ?? (await db());
+  const res = await c.execute({
+    sql: `SELECT id, task_id, run_id, agent_id, tool_name, risk_level, action_preview_json, status, created_at, resolved_at, resolved_by, decision_note
+          FROM approval_requests WHERE id = ?`,
+    args: [id],
+  });
+  const r = res.rows[0];
+  if (!r) return null;
+  return {
+    id: String(r.id),
+    taskId: r.task_id ? String(r.task_id) : null,
+    runId: r.run_id ? String(r.run_id) : null,
+    agentId: r.agent_id ? String(r.agent_id) : null,
+    toolName: String(r.tool_name),
+    riskLevel: String(r.risk_level),
+    actionPreviewJson: String(r.action_preview_json),
+    status: r.status as ApprovalStatus,
+    createdAt: String(r.created_at),
+    resolvedAt: r.resolved_at ? String(r.resolved_at) : null,
+    resolvedBy: r.resolved_by ? String(r.resolved_by) : null,
+    decisionNote: r.decision_note ? String(r.decision_note) : null,
+  };
+}
+
+export async function updateApprovalRequestStatus(
+  id: string,
+  update: { status: ApprovalStatus; resolvedBy?: string | null; decisionNote?: string | null; resolvedAt?: string | null },
+  client?: Client,
+): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({
+    sql: `UPDATE approval_requests
+          SET status = ?, resolved_by = ?, decision_note = ?, resolved_at = ?
+          WHERE id = ?`,
+    args: [
+      update.status,
+      update.resolvedBy ?? null,
+      update.decisionNote ?? null,
+      update.resolvedAt || new Date().toISOString(),
+      id,
+    ],
+  });
+}
+
+export async function listApprovalRequests(
+  filter?: { status?: ApprovalStatus; agentId?: string; limit?: number },
+  client?: Client,
+): Promise<ApprovalRequest[]> {
+  const c = client ?? (await db());
+  const limit = filter?.limit ?? 100;
+  const conditions: string[] = [];
+  const args: (string | number | null)[] = [];
+
+  if (filter?.status) {
+    conditions.push("status = ?");
+    args.push(filter.status);
+  }
+  if (filter?.agentId) {
+    conditions.push("agent_id = ?");
+    args.push(filter.agentId);
+  }
+
+  const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  args.push(limit);
+
+  const res = await c.execute({
+    sql: `SELECT id, task_id, run_id, agent_id, tool_name, risk_level, action_preview_json, status, created_at, resolved_at, resolved_by, decision_note
+          FROM approval_requests ${whereClause} ORDER BY created_at DESC LIMIT ?`,
+    args,
+  });
+
+  return res.rows.map((r) => ({
+    id: String(r.id),
+    taskId: r.task_id ? String(r.task_id) : null,
+    runId: r.run_id ? String(r.run_id) : null,
+    agentId: r.agent_id ? String(r.agent_id) : null,
+    toolName: String(r.tool_name),
+    riskLevel: String(r.risk_level),
+    actionPreviewJson: String(r.action_preview_json),
+    status: r.status as ApprovalStatus,
+    createdAt: String(r.created_at),
+    resolvedAt: r.resolved_at ? String(r.resolved_at) : null,
+    resolvedBy: r.resolved_by ? String(r.resolved_by) : null,
+    decisionNote: r.decision_note ? String(r.decision_note) : null,
+  }));
+}
+
+export async function logAudit(entry: AuditLogInput, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  const id = entry.id || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `audit-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  await c.execute({
+    sql: `INSERT INTO audit_logs (
+            id, timestamp, agent_id, task_id, tool_name, permission_level, decision, action_preview_json, result_summary, error
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      id,
+      entry.timestamp || new Date().toISOString(),
+      entry.agentId ?? null,
+      entry.taskId ?? null,
+      entry.toolName,
+      entry.permissionLevel,
+      entry.decision,
+      entry.actionPreviewJson,
+      entry.resultSummary ?? null,
+      entry.error ?? null,
+    ],
+  });
+}
+
+export async function listAuditLogs(
+  filter?: { agentId?: string; decision?: AuditDecision; limit?: number },
+  client?: Client,
+): Promise<AuditLog[]> {
+  const c = client ?? (await db());
+  const limit = filter?.limit ?? 100;
+  const conditions: string[] = [];
+  const args: (string | number | null)[] = [];
+
+  if (filter?.agentId) {
+    conditions.push("agent_id = ?");
+    args.push(filter.agentId);
+  }
+  if (filter?.decision) {
+    conditions.push("decision = ?");
+    args.push(filter.decision);
+  }
+
+  const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  args.push(limit);
+
+  const res = await c.execute({
+    sql: `SELECT id, timestamp, agent_id, task_id, tool_name, permission_level, decision, action_preview_json, result_summary, error
+          FROM audit_logs ${whereClause} ORDER BY timestamp DESC LIMIT ?`,
+    args,
+  });
+
+  return res.rows.map((r) => ({
+    id: String(r.id),
+    timestamp: String(r.timestamp),
+    agentId: r.agent_id ? String(r.agent_id) : null,
+    taskId: r.task_id ? String(r.task_id) : null,
+    toolName: String(r.tool_name),
+    permissionLevel: String(r.permission_level),
+    decision: r.decision as AuditDecision,
+    actionPreviewJson: String(r.action_preview_json),
+    resultSummary: r.result_summary ? String(r.result_summary) : null,
+    error: r.error ? String(r.error) : null,
+  }));
+}

@@ -26,6 +26,12 @@ import {
   logModelUsage,
   listModelUsageLogs,
   getModelUsageSummary,
+  createApprovalRequest,
+  getApprovalRequest,
+  updateApprovalRequestStatus,
+  listApprovalRequests,
+  logAudit,
+  listAuditLogs,
 } from "./index";
 import type { Client } from "@libsql/client";
 import type { Bot, ChatMessage, Room } from "@/lib/shared/types";
@@ -283,6 +289,95 @@ describe("SQLite Database Module (src/db)", () => {
       expect(summary.mockCalls).toBe(0);
       expect(summary.byModel["nebius/MiniMaxAI/MiniMax-M3"]).toBeDefined();
       expect(summary.byModel["ollama/llama3.2"]).toBeDefined();
+    });
+  });
+
+  describe("Approvals and Audit Logs (Module G)", () => {
+    it("creates, retrieves, and updates approval requests", async () => {
+      await createApprovalRequest(
+        {
+          id: "appr-1",
+          taskId: "task-100",
+          runId: "run-200",
+          agentId: "agent-1",
+          toolName: "browser_click",
+          riskLevel: "external_write",
+          actionPreviewJson: '{"selector":"#submit-btn"}',
+          status: "PENDING",
+        },
+        client,
+      );
+
+      const req = await getApprovalRequest("appr-1", client);
+      expect(req).not.toBeNull();
+      expect(req?.toolName).toBe("browser_click");
+      expect(req?.status).toBe("PENDING");
+      expect(req?.riskLevel).toBe("external_write");
+
+      await updateApprovalRequestStatus(
+        "appr-1",
+        {
+          status: "APPROVED",
+          resolvedBy: "admin-user",
+          decisionNote: "Confirmed safe action",
+        },
+        client,
+      );
+
+      const updated = await getApprovalRequest("appr-1", client);
+      expect(updated?.status).toBe("APPROVED");
+      expect(updated?.resolvedBy).toBe("admin-user");
+      expect(updated?.decisionNote).toBe("Confirmed safe action");
+      expect(updated?.resolvedAt).toBeTruthy();
+
+      const pendingList = await listApprovalRequests({ status: "PENDING" }, client);
+      expect(pendingList).toHaveLength(0);
+
+      const approvedList = await listApprovalRequests({ status: "APPROVED" }, client);
+      expect(approvedList).toHaveLength(1);
+      expect(approvedList[0].id).toBe("appr-1");
+    });
+
+    it("logs audit events and queries them with filters", async () => {
+      await logAudit(
+        {
+          id: "audit-1",
+          agentId: "agent-1",
+          taskId: "task-1",
+          toolName: "web_search",
+          permissionLevel: "FULL_ACCESS",
+          decision: "AUTO_ALLOWED",
+          actionPreviewJson: '{"query":"AI trends"}',
+          resultSummary: "Found 5 results",
+        },
+        client,
+      );
+
+      await logAudit(
+        {
+          id: "audit-2",
+          agentId: "agent-2",
+          taskId: "task-2",
+          toolName: "execute_typescript",
+          permissionLevel: "ASK_FIRST",
+          decision: "BLOCKED",
+          actionPreviewJson: '{"code":"console.log(1)"}',
+          error: "Permission denied",
+        },
+        client,
+      );
+
+      const allLogs = await listAuditLogs(undefined, client);
+      expect(allLogs).toHaveLength(2);
+
+      const blockedLogs = await listAuditLogs({ decision: "BLOCKED" }, client);
+      expect(blockedLogs).toHaveLength(1);
+      expect(blockedLogs[0].id).toBe("audit-2");
+      expect(blockedLogs[0].error).toBe("Permission denied");
+
+      const agent1Logs = await listAuditLogs({ agentId: "agent-1" }, client);
+      expect(agent1Logs).toHaveLength(1);
+      expect(agent1Logs[0].toolName).toBe("web_search");
     });
   });
 });
