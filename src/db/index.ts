@@ -1,5 +1,5 @@
 // Local SQLite database module for OpenCrewBot.
-// Manages local persistence for bots, rooms, messages, settings, and conversations.
+// Manages local persistence for bots, rooms, messages, settings, agent model configs, and model usage logs.
 import type { Client } from "@libsql/client";
 import type { Bot, ChatMessage, ConversationId, Room } from "@/lib/shared/types";
 import { getClient, openClient, closeClient } from "./client";
@@ -171,4 +171,239 @@ export async function bumpGeneration(conversationId: ConversationId, client?: Cl
     args: [conversationId],
   });
   return conversationGeneration(conversationId, c);
+}
+
+// ── agent model configs ────────────────────────────────────────────────
+
+export interface AgentModelConfig {
+  agentId: string;
+  provider: string;
+  primaryModel: string;
+  fallbackProvider?: string | null;
+  fallbackModel?: string | null;
+  updatedAt: string;
+}
+
+export async function saveAgentModelConfig(config: AgentModelConfig, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({
+    sql: `INSERT INTO agent_model_configs (agent_id, provider, primary_model, fallback_provider, fallback_model, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?)
+          ON CONFLICT(agent_id) DO UPDATE SET
+            provider = excluded.provider,
+            primary_model = excluded.primary_model,
+            fallback_provider = excluded.fallback_provider,
+            fallback_model = excluded.fallback_model,
+            updated_at = excluded.updated_at`,
+    args: [
+      config.agentId,
+      config.provider,
+      config.primaryModel,
+      config.fallbackProvider ?? null,
+      config.fallbackModel ?? null,
+      config.updatedAt || new Date().toISOString(),
+    ],
+  });
+}
+
+export async function getAgentModelConfig(agentId: string, client?: Client): Promise<AgentModelConfig | null> {
+  const c = client ?? (await db());
+  const res = await c.execute({
+    sql: "SELECT agent_id, provider, primary_model, fallback_provider, fallback_model, updated_at FROM agent_model_configs WHERE agent_id = ?",
+    args: [agentId],
+  });
+  const row = res.rows[0];
+  if (!row) return null;
+  return {
+    agentId: String(row.agent_id),
+    provider: String(row.provider),
+    primaryModel: String(row.primary_model),
+    fallbackProvider: row.fallback_provider ? String(row.fallback_provider) : null,
+    fallbackModel: row.fallback_model ? String(row.fallback_model) : null,
+    updatedAt: String(row.updated_at),
+  };
+}
+
+export async function listAgentModelConfigs(client?: Client): Promise<AgentModelConfig[]> {
+  const c = client ?? (await db());
+  const res = await c.execute("SELECT agent_id, provider, primary_model, fallback_provider, fallback_model, updated_at FROM agent_model_configs ORDER BY updated_at DESC");
+  return res.rows.map((row) => ({
+    agentId: String(row.agent_id),
+    provider: String(row.provider),
+    primaryModel: String(row.primary_model),
+    fallbackProvider: row.fallback_provider ? String(row.fallback_provider) : null,
+    fallbackModel: row.fallback_model ? String(row.fallback_model) : null,
+    updatedAt: String(row.updated_at),
+  }));
+}
+
+export async function deleteAgentModelConfig(agentId: string, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({ sql: "DELETE FROM agent_model_configs WHERE agent_id = ?", args: [agentId] });
+}
+
+// ── model usage logs & metrics ─────────────────────────────────────────
+
+export interface ModelUsageLog {
+  id: string;
+  timestamp: string;
+  agentId: string | null;
+  taskId: string | null;
+  provider: string;
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  estimatedCostUsd: number | null;
+  fallbackUsed: boolean;
+  isMock: boolean;
+}
+
+export interface ModelUsageLogInput {
+  id: string;
+  timestamp?: string;
+  agentId?: string | null;
+  taskId?: string | null;
+  provider: string;
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  estimatedCostUsd?: number | null;
+  fallbackUsed?: boolean | number;
+  isMock?: boolean | number;
+}
+
+export interface ModelUsageSummary {
+  totalPromptTokens: number;
+  totalCompletionTokens: number;
+  totalTokens: number;
+  totalCostUsd: number;
+  totalCalls: number;
+  fallbackCalls: number;
+  mockCalls: number;
+  byAgent: Record<string, { promptTokens: number; completionTokens: number; totalTokens: number; costUsd: number; calls: number }>;
+  byModel: Record<string, { promptTokens: number; completionTokens: number; totalTokens: number; costUsd: number; calls: number }>;
+}
+
+export async function logModelUsage(log: ModelUsageLogInput, client?: Client): Promise<void> {
+  const c = client ?? (await db());
+  await c.execute({
+    sql: `INSERT INTO model_usage_logs (
+            id, timestamp, agent_id, task_id, provider, model, prompt_tokens, completion_tokens, estimated_cost_usd, fallback_used, is_mock
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      log.id,
+      log.timestamp || new Date().toISOString(),
+      log.agentId ?? null,
+      log.taskId ?? null,
+      log.provider,
+      log.model,
+      log.promptTokens,
+      log.completionTokens,
+      log.estimatedCostUsd ?? null,
+      log.fallbackUsed ? 1 : 0,
+      log.isMock ? 1 : 0,
+    ],
+  });
+}
+
+export async function listModelUsageLogs(
+  options?: { limit?: number; agentId?: string; model?: string },
+  client?: Client,
+): Promise<ModelUsageLog[]> {
+  const c = client ?? (await db());
+  const limit = options?.limit ?? 100;
+  const conditions: string[] = [];
+  const args: (string | number)[] = [];
+
+  if (options?.agentId) {
+    conditions.push("agent_id = ?");
+    args.push(options.agentId);
+  }
+  if (options?.model) {
+    conditions.push("model = ?");
+    args.push(options.model);
+  }
+
+  const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  args.push(limit);
+
+  const res = await c.execute({
+    sql: `SELECT id, timestamp, agent_id, task_id, provider, model, prompt_tokens, completion_tokens, estimated_cost_usd, fallback_used, is_mock
+          FROM model_usage_logs ${whereClause} ORDER BY timestamp DESC LIMIT ?`,
+    args,
+  });
+
+  return res.rows.map((r) => ({
+    id: String(r.id),
+    timestamp: String(r.timestamp),
+    agentId: r.agent_id ? String(r.agent_id) : null,
+    taskId: r.task_id ? String(r.task_id) : null,
+    provider: String(r.provider),
+    model: String(r.model),
+    promptTokens: Number(r.prompt_tokens),
+    completionTokens: Number(r.completion_tokens),
+    estimatedCostUsd: r.estimated_cost_usd !== null ? Number(r.estimated_cost_usd) : null,
+    fallbackUsed: Boolean(r.fallback_used),
+    isMock: Boolean(r.is_mock),
+  }));
+}
+
+export async function getModelUsageSummary(
+  filter?: { agentId?: string; model?: string },
+  client?: Client,
+): Promise<ModelUsageSummary> {
+  const logs = await listModelUsageLogs({ limit: 10000, agentId: filter?.agentId, model: filter?.model }, client);
+
+  const summary: ModelUsageSummary = {
+    totalPromptTokens: 0,
+    totalCompletionTokens: 0,
+    totalTokens: 0,
+    totalCostUsd: 0,
+    totalCalls: logs.length,
+    fallbackCalls: 0,
+    mockCalls: 0,
+    byAgent: {},
+    byModel: {},
+  };
+
+  for (const log of logs) {
+    summary.totalPromptTokens += log.promptTokens;
+    summary.totalCompletionTokens += log.completionTokens;
+    summary.totalTokens += log.promptTokens + log.completionTokens;
+    if (log.estimatedCostUsd) summary.totalCostUsd += log.estimatedCostUsd;
+    if (log.fallbackUsed) summary.fallbackCalls++;
+    if (log.isMock) summary.mockCalls++;
+
+    const agentKey = log.agentId || "unknown";
+    if (!summary.byAgent[agentKey]) {
+      summary.byAgent[agentKey] = { promptTokens: 0, completionTokens: 0, totalTokens: 0, costUsd: 0, calls: 0 };
+    }
+    const a = summary.byAgent[agentKey];
+    a.promptTokens += log.promptTokens;
+    a.completionTokens += log.completionTokens;
+    a.totalTokens += log.promptTokens + log.completionTokens;
+    if (log.estimatedCostUsd) a.costUsd += log.estimatedCostUsd;
+    a.calls++;
+
+    const modelKey = `${log.provider}/${log.model}`;
+    if (!summary.byModel[modelKey]) {
+      summary.byModel[modelKey] = { promptTokens: 0, completionTokens: 0, totalTokens: 0, costUsd: 0, calls: 0 };
+    }
+    const m = summary.byModel[modelKey];
+    m.promptTokens += log.promptTokens;
+    m.completionTokens += log.completionTokens;
+    m.totalTokens += log.promptTokens + log.completionTokens;
+    if (log.estimatedCostUsd) m.costUsd += log.estimatedCostUsd;
+    m.calls++;
+  }
+
+  summary.totalCostUsd = Math.round(summary.totalCostUsd * 10000) / 10000;
+  for (const key of Object.keys(summary.byAgent)) {
+    summary.byAgent[key].costUsd = Math.round(summary.byAgent[key].costUsd * 10000) / 10000;
+  }
+  for (const key of Object.keys(summary.byModel)) {
+    summary.byModel[key].costUsd = Math.round(summary.byModel[key].costUsd * 10000) / 10000;
+  }
+
+  return summary;
 }

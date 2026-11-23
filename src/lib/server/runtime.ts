@@ -10,9 +10,9 @@ import { Memory } from "@mastra/memory";
 import { randomUUID } from "node:crypto";
 import type { Bot, ChatMessage, ConversationId, Part, RouteNote } from "@/lib/shared/types";
 import { MASTRA_DB_URL, OWNER_ID, isMock } from "./config";
-import { conversationGeneration, getBot, saveMessage } from "./db";
+import { conversationGeneration, getBot, logModelUsage, saveMessage } from "./db";
 import { publish } from "./bus";
-import { costUsd, findModel } from "./models";
+import { costUsd, findModel, resolveMastraModelConfig } from "./models";
 import { createMockModel } from "./mock-model";
 import { announceLiveView, createSession, releaseSession } from "./browserbase";
 import { buildConnectorTools, connectionsVersion } from "./connectors";
@@ -102,7 +102,15 @@ async function buildRuntime(bot: Bot): Promise<BotRuntime> {
     id: `bot-${bot.id}`,
     name: bot.name,
     instructions: () => systemPrompt(holder.bot, capabilities, builtIn.instructions),
-    model: isMock() ? createMockModel(bot.name) : () => `nebius/${holder.bot.model}`,
+    model: isMock()
+      ? createMockModel(bot.name)
+      : () => {
+          const m = holder.bot.model;
+          const target = m.includes("/")
+            ? { provider: m.split("/")[0], model: m.slice(m.indexOf("/") + 1) }
+            : { provider: "nebius", model: m };
+          return resolveMastraModelConfig(target) as never;
+        },
     tools: { ...connectors.tools, ...builtIn.tools },
     memory,
   });
@@ -349,6 +357,19 @@ class TurnFolder {
     } else {
       this.message.usage = { input: this.input, output: this.output, costUsd: null };
     }
+    await logModelUsage({
+      id: randomUUID(),
+      timestamp: new Date().toISOString(),
+      agentId: this.message.botId ?? null,
+      taskId: this.message.conversationId,
+      provider: this.message.model === "mock" ? "mock" : (this.message.model?.includes("/") ? this.message.model.split("/")[0] : "nebius"),
+      model: this.message.model ?? "unknown",
+      promptTokens: this.input,
+      completionTokens: this.output,
+      estimatedCostUsd: this.message.usage?.costUsd ?? null,
+      fallbackUsed: false,
+      isMock: isMock() || this.message.model === "mock",
+    }).catch(() => {});
     await saveMessage(this.message);
     publish({ type: "message", message: this.message });
     this.resolveDone(this.message);

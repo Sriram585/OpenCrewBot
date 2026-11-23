@@ -1,5 +1,32 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { openClient, getSetting, setSetting, listBots, getBot, saveBot, deleteBotRow, listRooms, getRoom, saveRoom, deleteRoomRow, saveMessage, listMessages, clearMessages, lastMessages, unreadCounts, markRead, conversationGeneration, bumpGeneration } from "./index";
+import {
+  openClient,
+  getSetting,
+  setSetting,
+  listBots,
+  getBot,
+  saveBot,
+  deleteBotRow,
+  listRooms,
+  getRoom,
+  saveRoom,
+  deleteRoomRow,
+  saveMessage,
+  listMessages,
+  clearMessages,
+  lastMessages,
+  unreadCounts,
+  markRead,
+  conversationGeneration,
+  bumpGeneration,
+  saveAgentModelConfig,
+  getAgentModelConfig,
+  listAgentModelConfigs,
+  deleteAgentModelConfig,
+  logModelUsage,
+  listModelUsageLogs,
+  getModelUsageSummary,
+} from "./index";
 import type { Client } from "@libsql/client";
 import type { Bot, ChatMessage, Room } from "@/lib/shared/types";
 
@@ -175,6 +202,87 @@ describe("SQLite Database Module (src/db)", () => {
 
       const latest = await lastMessages(client);
       expect(latest.get(convId)?.id).toBe("msg-2");
+    });
+  });
+
+  describe("Agent Model Configs", () => {
+    it("saves, gets, lists, and deletes agent model configs", async () => {
+      expect(await listAgentModelConfigs(client)).toHaveLength(0);
+
+      await saveAgentModelConfig(
+        {
+          agentId: "bot-1",
+          provider: "openai",
+          primaryModel: "gpt-4o",
+          fallbackProvider: "ollama",
+          fallbackModel: "llama3.2",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+        client,
+      );
+
+      const config = await getAgentModelConfig("bot-1", client);
+      expect(config?.provider).toBe("openai");
+      expect(config?.primaryModel).toBe("gpt-4o");
+      expect(config?.fallbackModel).toBe("llama3.2");
+
+      const all = await listAgentModelConfigs(client);
+      expect(all).toHaveLength(1);
+
+      await deleteAgentModelConfig("bot-1", client);
+      expect(await getAgentModelConfig("bot-1", client)).toBeNull();
+    });
+  });
+
+  describe("Model Usage Logs", () => {
+    it("logs usage, retrieves logs, and computes aggregated summaries", async () => {
+      await logModelUsage(
+        {
+          id: "log-1",
+          timestamp: "2026-01-01T12:00:00.000Z",
+          agentId: "bot-1",
+          taskId: "task-1",
+          provider: "nebius",
+          model: "MiniMaxAI/MiniMax-M3",
+          promptTokens: 500,
+          completionTokens: 250,
+          estimatedCostUsd: 0.00045,
+          fallbackUsed: false,
+          isMock: false,
+        },
+        client,
+      );
+
+      await logModelUsage(
+        {
+          id: "log-2",
+          timestamp: "2026-01-01T12:05:00.000Z",
+          agentId: "bot-1",
+          taskId: "task-2",
+          provider: "ollama",
+          model: "llama3.2",
+          promptTokens: 300,
+          completionTokens: 100,
+          estimatedCostUsd: 0,
+          fallbackUsed: true,
+          isMock: false,
+        },
+        client,
+      );
+
+      const logs = await listModelUsageLogs({ agentId: "bot-1" }, client);
+      expect(logs).toHaveLength(2);
+      expect(logs[0].id).toBe("log-2"); // ordered desc
+
+      const summary = await getModelUsageSummary({ agentId: "bot-1" }, client);
+      expect(summary.totalCalls).toBe(2);
+      expect(summary.totalPromptTokens).toBe(800);
+      expect(summary.totalCompletionTokens).toBe(350);
+      expect(summary.totalTokens).toBe(1150);
+      expect(summary.fallbackCalls).toBe(1);
+      expect(summary.mockCalls).toBe(0);
+      expect(summary.byModel["nebius/MiniMaxAI/MiniMax-M3"]).toBeDefined();
+      expect(summary.byModel["ollama/llama3.2"]).toBeDefined();
     });
   });
 });

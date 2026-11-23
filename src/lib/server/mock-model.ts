@@ -1,8 +1,11 @@
-// A scripted stand-in for a real model, used when NEBIUS_API_KEY is missing.
+// A scripted stand-in for a real model, used when MOCK_MODE=true or no live keys exist.
 // It streams a short reply and exercises the same paths a real model does:
 // "remember …" calls the memory tool, "search …" calls web search, "ask me …"
 // asks a question card, and "open <url>" drives the browser (which asks first).
+// All mock outputs are explicitly prefixed with [MOCKED] to clearly label simulated outputs.
 import { MastraLanguageModelV2Mock } from "@mastra/core/test-utils/llm-mock";
+
+export const MOCK_PREFIX = "[MOCKED]";
 
 type Part = Record<string, unknown>;
 type PromptMessage = { role: string; content: unknown };
@@ -65,7 +68,7 @@ export function createMockModel(botName: string) {
         return {
           stream: streamOf([
             ...start,
-            ...textParts(`Done. The tool returned: ${result}\n\n*(Mock model. The tool really ran.)*`),
+            ...textParts(`${MOCK_PREFIX} Done. The tool returned: ${result}\n\n*(Mock model. The tool really ran.)*`),
             { type: "finish", finishReason: "stop", usage },
           ]),
         };
@@ -97,7 +100,7 @@ export function createMockModel(botName: string) {
       if (search && tools.has("web_search")) return toolCall("web_search", { query: search[1], maxResults: 3 });
 
       const reply =
-        `Hi, I'm **${botName}**, running on the *mock model* because no \`NEBIUS_API_KEY\` is set yet.\n\n` +
+        `${MOCK_PREFIX} Hi, I'm **${botName}**, running on the *mock model* because no live model key is configured or MOCK_MODE is enabled.\n\n` +
         `You said: "${said.slice(0, 200)}"\n\n` +
         "Try `remember that I like short answers`, `search for Nebius Token Factory`, or `ask me something` to see tools run.";
       return { stream: streamOf([...start, ...textParts(reply), { type: "finish", finishReason: "stop", usage }]) };
