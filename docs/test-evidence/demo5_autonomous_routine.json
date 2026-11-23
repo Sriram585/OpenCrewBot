@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-11-23T11:15:05.973Z",
+  "workflow": {
+    "id": "wf-0f403a08",
+    "name": "MeetUniversity Weekly Competitor Scanner",
+    "description": "Weekly automated sweep of edtech career platforms and university guidance pricing.",
+    "roomId": "room-executive-strategy",
+    "goalPrompt": "Scan edtech competitors for career discovery and study abroad guidance pricing shifts.",
+    "cronExpression": "0 9 * * 1",
+    "status": "ACTIVE",
+    "lastRunAt": null,
+    "nextRunAt": null,
+    "lastStatus": null,
+    "lastError": null,
+    "createdAt": "2026-11-23T11:15:05.979Z"
+  },
+  "execution": {
+    "runId": "wfrun-938906f5",
+    "status": "COMPLETED",
+    "output": "### Market Landscape & Trends Discovery\n[MOCKED] Market Researcher (Web & Market Intelligence) successfully executed task \"Market Landscape & Trends Discovery\": Investigate market dynamics, industry benchmarks, and user demand for: \"Scan edtech competitors for career discovery and study abroad guidance pricing shifts.\".\n\n### Competitive Positioning & SWOT Analysis\n[MOCKED] Competitor Analyst (Competitive Intelligence) successfully executed task \"Competitive Positioning & SWOT Analysis\": Evaluate key competitors, differentiation opportunities, and feature gaps for: \"Scan edtech competitors for career discovery and study abroad guidance pricing shifts.\".\n\n### Technical Architecture & Code Review\n[MOCKED] Data Analyst (Quantitative & Metrics Analysis) successfully executed task \"Technical Architecture & Code Review\": Perform architecture assessment, code analysis, and security verification for: \"Scan edtech competitors for career discovery and study abroad guidance pricing shifts.\".\n\n### Executive Consolidation & Strategic Synthesis\n[MOCKED] Chief of Staff (Executive Orchestrator) successfully executed task \"Executive Consolidation & Strategic Synthesis\": Synthesize findings from all prerequisite tasks (task-run-ea74f77d-3714-4041-927d-035c232c1ad2-1, task-run-ea74f77d-3714-4041-927d-035c232c1ad2-2, task-run-ea74f77d-3714-4041-927d-035c232c1ad2-3) into an actionable executive business deliverable."
+  },
+  "history": [
+    {
+      "id": "wfrun-938906f5",
+      "workflowId": "wf-0f403a08",
+      "runId": null,
+      "triggerType": "MANUAL",
+      "status": "COMPLETED",
+      "startedAt": "2026-11-23T11:15:06.004Z",
+      "completedAt": "2026-11-23T11:15:06.099Z",
+      "error": null
+    }
+  ]
+}

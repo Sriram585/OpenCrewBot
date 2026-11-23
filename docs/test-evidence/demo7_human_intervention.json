@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-11-23T11:15:06.150Z",
+  "approvalId": "appr-f8a3d525-a5e2-408c-8fe7-0c248f2d9415",
+  "rejection": {
+    "success": true
+  },
+  "updatedReq": {
+    "id": "appr-f8a3d525-a5e2-408c-8fe7-0c248f2d9415",
+    "taskId": null,
+    "runId": null,
+    "agentId": "agent-automation-ops",
+    "toolName": "slack_post_message",
+    "riskLevel": "external_write",
+    "actionPreviewJson": "{\"channel\":\"#leadership\",\"text\":\"ALERT: Major pipeline bottleneck detected in Aspirations conversion.\"}",
+    "status": "REJECTED",
+    "createdAt": "2026-11-23T11:15:06.151Z",
+    "resolvedAt": "2026-11-23T11:15:06.153Z",
+    "resolvedBy": "Executive Supervisor",
+    "decisionNote": "Rejected: Review messaging internally before posting to leadership channel."
+  },
+  "executedCount": 0,
+  "auditLogs": [
+    {
+      "id": "8f5ce600-f958-44e4-a8c7-095fefcdfb81",
+      "timestamp": "2026-11-23T11:15:06.154Z",
+      "agentId": "agent-automation-ops",
+      "taskId": null,
+      "toolName": "slack_post_message",
+      "permissionLevel": "ASK_FIRST",
+      "decision": "REJECTED",
+      "actionPreviewJson": "{\"channel\":\"#leadership\",\"text\":\"ALERT: Major pipeline bottleneck detected in Aspirations conversion.\"}",
+      "resultSummary": "Rejected by Executive Supervisor: Rejected: Review messaging internally before posting to leadership channel.",
+      "error": null
+    }
+  ]
+}

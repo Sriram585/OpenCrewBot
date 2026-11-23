@@ -1,0 +1,142 @@
+{
+  "timestamp": "2026-11-23T11:15:04.592Z",
+  "analysis": {
+    "rowCount": 250,
+    "columns": [
+      "lead_id",
+      "created_date",
+      "product_line",
+      "region",
+      "funnel_stage",
+      "counselor",
+      "conversion_status",
+      "revenue_inr"
+    ],
+    "numericalSummaries": {
+      "revenue_inr": {
+        "min": 0,
+        "max": 535823,
+        "sum": 4724985,
+        "average": 18899.94
+      }
+    },
+    "segmentRevenue": [
+      {
+        "segment": "North",
+        "revenue": 1685968,
+        "percentageOfTotal": 35.7
+      },
+      {
+        "segment": "South",
+        "revenue": 830599,
+        "percentageOfTotal": 17.6
+      },
+      {
+        "segment": "International",
+        "revenue": 828542,
+        "percentageOfTotal": 17.5
+      },
+      {
+        "segment": "West",
+        "revenue": 582801,
+        "percentageOfTotal": 12.3
+      },
+      {
+        "segment": "Central",
+        "revenue": 422532,
+        "percentageOfTotal": 8.9
+      },
+      {
+        "segment": "East",
+        "revenue": 374543,
+        "percentageOfTotal": 7.9
+      }
+    ],
+    "funnelConversion": {
+      "stages": [
+        {
+          "stage": "Counselled",
+          "count": 124,
+          "conversionFromPrevious": 100,
+          "dropoffCount": 0
+        },
+        {
+          "stage": "Contacted",
+          "count": 50,
+          "conversionFromPrevious": 40.3,
+          "dropoffCount": 74
+        },
+        {
+          "stage": "Enrolled",
+          "count": 34,
+          "conversionFromPrevious": 68,
+          "dropoffCount": 16
+        },
+        {
+          "stage": "Lead",
+          "count": 27,
+          "conversionFromPrevious": 79.4,
+          "dropoffCount": 7
+        },
+        {
+          "stage": "Application_Started",
+          "count": 15,
+          "conversionFromPrevious": 55.6,
+          "dropoffCount": 12
+        }
+      ],
+      "overallConversionRate": 12.1,
+      "bottleneckStage": "Contacted"
+    },
+    "chartData": {
+      "barChart": [
+        {
+          "label": "North",
+          "value": 1685968
+        },
+        {
+          "label": "South",
+          "value": 830599
+        },
+        {
+          "label": "International",
+          "value": 828542
+        },
+        {
+          "label": "West",
+          "value": 582801
+        },
+        {
+          "label": "Central",
+          "value": 422532
+        },
+        {
+          "label": "East",
+          "value": 374543
+        }
+      ],
+      "funnelChart": [
+        {
+          "step": "Counselled",
+          "value": 124
+        },
+        {
+          "step": "Contacted",
+          "value": 50
+        },
+        {
+          "step": "Enrolled",
+          "value": 34
+        },
+        {
+          "step": "Lead",
+          "value": 27
+        },
+        {
+          "step": "Application_Started",
+          "value": 15
+        }
+      ]
+    }
+  }
+}
