@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-11-23T11:15:06.150Z",
-  "approvalId": "appr-f8a3d525-a5e2-408c-8fe7-0c248f2d9415",
+  "timestamp": "2026-11-25T03:08:49.031Z",
+  "approvalId": "appr-4f4fb7fa-261d-4b81-b54f-4d7fe1d328e3",
   "rejection": {
     "success": true
   },
   "updatedReq": {
-    "id": "appr-f8a3d525-a5e2-408c-8fe7-0c248f2d9415",
+    "id": "appr-4f4fb7fa-261d-4b81-b54f-4d7fe1d328e3",
     "taskId": null,
     "runId": null,
     "agentId": "agent-automation-ops",
@@ -13,16 +13,16 @@
     "riskLevel": "external_write",
     "actionPreviewJson": "{\"channel\":\"#leadership\",\"text\":\"ALERT: Major pipeline bottleneck detected in Aspirations conversion.\"}",
     "status": "REJECTED",
-    "createdAt": "2026-11-23T11:15:06.151Z",
-    "resolvedAt": "2026-11-23T11:15:06.153Z",
+    "createdAt": "2026-11-25T03:08:49.031Z",
+    "resolvedAt": "2026-11-25T03:08:49.032Z",
     "resolvedBy": "Executive Supervisor",
     "decisionNote": "Rejected: Review messaging internally before posting to leadership channel."
   },
   "executedCount": 0,
   "auditLogs": [
     {
-      "id": "8f5ce600-f958-44e4-a8c7-095fefcdfb81",
-      "timestamp": "2026-11-23T11:15:06.154Z",
+      "id": "71ff79f9-12c4-4364-9e43-f2f4d4f7d004",
+      "timestamp": "2026-11-25T03:08:49.033Z",
       "agentId": "agent-automation-ops",
       "taskId": null,
       "toolName": "slack_post_message",

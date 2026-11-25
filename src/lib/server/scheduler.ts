@@ -78,7 +78,57 @@ export class WorkflowScheduler {
     filter?: { status?: WorkflowStatus; roomId?: string },
     client?: Client,
   ): Promise<ScheduledWorkflow[]> {
-    return listScheduledWorkflows(filter, client);
+    let workflows = await listScheduledWorkflows(filter, client);
+    if (workflows.length === 0 && !filter) {
+      await this.seedDefaultWorkflows(client);
+      workflows = await listScheduledWorkflows(filter, client);
+    }
+    return workflows;
+  }
+
+  async seedDefaultWorkflows(client?: Client): Promise<void> {
+    const defaults = [
+      {
+        id: "wf-daily-digest",
+        name: "Daily University Digest",
+        description: "Automated morning digest aggregating admission updates, visa policies, and competitor moves.",
+        goalPrompt: "Aggregate daily global university admissions updates, foreign visa policy adjustments, and competitive tuition benchmarking.",
+        cronExpression: "0 9 * * *",
+      },
+      {
+        id: "wf-weekly-pipeline",
+        name: "Weekly Pipeline Review",
+        description: "Weekly executive briefing analyzing sales funnel conversion bottlenecks across product lines.",
+        goalPrompt: "Analyze weekly sales conversion metrics from CRM records, detect lead drop-offs, and recommend counselor intervention strategies.",
+        cronExpression: "0 8 * * 1",
+      },
+      {
+        id: "wf-monthly-market",
+        name: "Monthly Market Shift",
+        description: "Monthly macroeconomic analysis of student mobility trends and currency fluctuations.",
+        goalPrompt: "Synthesize macro study abroad trends, exchange rate fluctuations, and student migration patterns for European engineering programs.",
+        cronExpression: "0 0 1 * *",
+      },
+    ];
+
+    for (const d of defaults) {
+      const existing = await getScheduledWorkflow(d.id, client);
+      if (!existing) {
+        await createScheduledWorkflow(
+          {
+            id: d.id,
+            name: d.name,
+            description: d.description,
+            roomId: null,
+            goalPrompt: d.goalPrompt,
+            cronExpression: d.cronExpression,
+            status: "ACTIVE",
+            createdAt: new Date().toISOString(),
+          },
+          client,
+        );
+      }
+    }
   }
 
   async getWorkflow(id: string, client?: Client): Promise<ScheduledWorkflow | null> {

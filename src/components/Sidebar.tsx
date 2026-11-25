@@ -249,10 +249,10 @@ export function Sidebar() {
 
   const navItems = [
     { id: "agents" as const, label: "Agent Workspace", icon: <Users size={15} /> },
-    { id: "tasks" as const, label: "Task Engine (DAG)", icon: <Play size={15} /> },
+    { id: "tasks" as const, label: "Chief of Staff (DAG)", icon: <Play size={15} /> },
+    { id: "skills" as const, label: "Tools & Sandboxes", icon: <BookOpen size={15} /> },
     { id: "approvals" as const, label: "Approval Centre", icon: <Shield size={15} /> },
     { id: "memory" as const, label: "Memory Manager", icon: <HardDrive size={15} /> },
-    { id: "skills" as const, label: "Skills & Playbooks", icon: <BookOpen size={15} /> },
     { id: "integrations" as const, label: "Integrations Hub", icon: <Plug size={15} /> },
     { id: "models" as const, label: "Model Intelligence", icon: <Cpu size={15} /> },
     { id: "workflows" as const, label: "Scheduled Workflows", icon: <Calendar size={15} /> },
@@ -308,6 +308,7 @@ export function Sidebar() {
             return (
               <button
                 key={item.id}
+                data-nav={item.id}
                 onClick={() => setActiveView(item.id)}
                 className={clsx(
                   "flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-[13px] transition-colors",

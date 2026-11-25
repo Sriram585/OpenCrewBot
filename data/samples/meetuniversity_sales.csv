@@ -1,0 +1,251 @@
+lead_id,created_date,product_line,region,funnel_stage,counselor,conversion_status,revenue_inr
+LEAD-2026-0001,2026-11-09,School Partnerships,International,Counselled,Sneha Patel,In_Progress,0
+LEAD-2026-0002,2026-10-17,Aspirations,Central,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0003,2026-10-29,School Partnerships,International,Contacted,Amitabh Sen,Lost,0
+LEAD-2026-0004,2026-10-22,School Partnerships,North,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0005,2026-10-23,Aspirations,East,Counselled,Sneha Patel,In_Progress,0
+LEAD-2026-0006,2026-09-09,School Partnerships,West,Enrolled,Rahul Verma,Won,305933
+LEAD-2026-0007,2026-09-27,School Partnerships,South,Enrolled,Pooja Sharma,Won,305524
+LEAD-2026-0008,2026-10-22,School Partnerships,South,Lead,Vikram Malhotra,Lost,0
+LEAD-2026-0009,2026-10-03,School Partnerships,International,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0010,2026-11-14,Study Abroad,South,Counselled,Vikram Malhotra,In_Progress,0
+LEAD-2026-0011,2026-10-15,School Partnerships,International,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0012,2026-10-20,Study Abroad,South,Lead,Ananya Iyer,Lost,0
+LEAD-2026-0013,2026-10-06,Study Abroad,South,Lead,Amitabh Sen,Lost,0
+LEAD-2026-0014,2026-10-01,Study Abroad,East,Contacted,Rahul Verma,Lost,0
+LEAD-2026-0015,2026-10-30,Aspirations,West,Counselled,Vikram Malhotra,In_Progress,0
+LEAD-2026-0016,2026-11-10,Aspirations,North,Counselled,Rahul Verma,In_Progress,0
+LEAD-2026-0017,2026-09-10,Aspirations,North,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0018,2026-11-03,School Partnerships,East,Application_Started,Ananya Iyer,In_Progress,0
+LEAD-2026-0019,2026-10-14,Aspirations,East,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0020,2026-09-09,School Partnerships,Central,Counselled,Vikram Malhotra,In_Progress,0
+LEAD-2026-0021,2026-10-13,School Partnerships,West,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0022,2026-09-15,Study Abroad,South,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0023,2026-09-30,Study Abroad,South,Enrolled,Amitabh Sen,Won,76273
+LEAD-2026-0024,2026-10-06,Study Abroad,International,Contacted,Vikram Malhotra,Lost,0
+LEAD-2026-0025,2026-10-29,School Partnerships,East,Application_Started,Rahul Verma,In_Progress,0
+LEAD-2026-0026,2026-09-18,Study Abroad,International,Contacted,Vikram Malhotra,Lost,0
+LEAD-2026-0027,2026-09-12,Aspirations,West,Counselled,Rahul Verma,In_Progress,0
+LEAD-2026-0028,2026-10-02,Aspirations,Central,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0029,2026-09-25,School Partnerships,South,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0030,2026-09-17,Aspirations,North,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0031,2026-10-05,Study Abroad,Central,Contacted,Rahul Verma,In_Progress,0
+LEAD-2026-0032,2026-09-25,School Partnerships,East,Counselled,Rahul Verma,In_Progress,0
+LEAD-2026-0033,2026-09-15,School Partnerships,Central,Lead,Sneha Patel,In_Progress,0
+LEAD-2026-0034,2026-09-30,School Partnerships,Central,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0035,2026-09-18,Study Abroad,International,Counselled,Rahul Verma,In_Progress,0
+LEAD-2026-0036,2026-09-06,Aspirations,West,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0037,2026-09-19,Aspirations,East,Enrolled,Ananya Iyer,Won,22978
+LEAD-2026-0038,2026-09-05,Study Abroad,International,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0039,2026-11-09,School Partnerships,Central,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0040,2026-09-01,Aspirations,West,Contacted,Vikram Malhotra,Lost,0
+LEAD-2026-0041,2026-11-04,Aspirations,North,Contacted,Ananya Iyer,In_Progress,0
+LEAD-2026-0042,2026-10-18,Aspirations,South,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0043,2026-10-27,Aspirations,North,Contacted,Ananya Iyer,Lost,0
+LEAD-2026-0044,2026-10-08,School Partnerships,North,Enrolled,Rahul Verma,Won,514295
+LEAD-2026-0045,2026-09-19,Study Abroad,West,Contacted,Sneha Patel,Lost,0
+LEAD-2026-0046,2026-09-26,Aspirations,Central,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0047,2026-09-05,Study Abroad,International,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0048,2026-11-03,School Partnerships,Central,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0049,2026-11-07,Aspirations,South,Contacted,Pooja Sharma,Lost,0
+LEAD-2026-0050,2026-10-15,Aspirations,Central,Contacted,Amitabh Sen,Lost,0
+LEAD-2026-0051,2026-09-21,School Partnerships,Central,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0052,2026-09-24,School Partnerships,East,Lead,Sneha Patel,In_Progress,0
+LEAD-2026-0053,2026-11-18,Study Abroad,East,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0054,2026-10-23,Aspirations,International,Application_Started,Amitabh Sen,In_Progress,0
+LEAD-2026-0055,2026-09-29,Study Abroad,Central,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0056,2026-09-09,Aspirations,International,Lead,Rahul Verma,Lost,0
+LEAD-2026-0057,2026-10-19,School Partnerships,International,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0058,2026-09-18,School Partnerships,South,Application_Started,Rahul Verma,In_Progress,0
+LEAD-2026-0059,2026-10-17,Aspirations,East,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0060,2026-10-07,Aspirations,South,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0061,2026-11-11,Aspirations,North,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0062,2026-09-16,Study Abroad,Central,Contacted,Ananya Iyer,In_Progress,0
+LEAD-2026-0063,2026-10-28,Study Abroad,South,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0064,2026-11-03,School Partnerships,South,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0065,2026-10-29,Study Abroad,Central,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0066,2026-11-11,School Partnerships,West,Contacted,Ananya Iyer,Lost,0
+LEAD-2026-0067,2026-10-19,Study Abroad,South,Counselled,Sneha Patel,In_Progress,0
+LEAD-2026-0068,2026-09-16,Aspirations,Central,Enrolled,Ananya Iyer,Won,25653
+LEAD-2026-0069,2026-08-31,Aspirations,West,Application_Started,Pooja Sharma,In_Progress,0
+LEAD-2026-0070,2026-11-02,Study Abroad,International,Lead,Rahul Verma,Lost,0
+LEAD-2026-0071,2026-09-05,Study Abroad,North,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0072,2026-10-23,Aspirations,South,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0073,2026-11-12,School Partnerships,South,Contacted,Pooja Sharma,Lost,0
+LEAD-2026-0074,2026-09-13,School Partnerships,International,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0075,2026-10-28,School Partnerships,South,Contacted,Pooja Sharma,In_Progress,0
+LEAD-2026-0076,2026-11-15,Study Abroad,Central,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0077,2026-09-14,Aspirations,East,Lead,Rahul Verma,Lost,0
+LEAD-2026-0078,2026-10-27,School Partnerships,South,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0079,2026-11-12,Aspirations,International,Counselled,Vikram Malhotra,In_Progress,0
+LEAD-2026-0080,2026-09-08,Aspirations,North,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0081,2026-10-19,Study Abroad,North,Enrolled,Ananya Iyer,Won,110247
+LEAD-2026-0082,2026-11-02,Study Abroad,South,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0083,2026-11-15,Aspirations,East,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0084,2026-10-05,Aspirations,International,Contacted,Amitabh Sen,In_Progress,0
+LEAD-2026-0085,2026-10-16,School Partnerships,South,Counselled,Sneha Patel,In_Progress,0
+LEAD-2026-0086,2026-10-27,Aspirations,North,Enrolled,Pooja Sharma,Won,20777
+LEAD-2026-0087,2026-09-14,School Partnerships,East,Counselled,Ananya Iyer,In_Progress,0
+LEAD-2026-0088,2026-09-23,School Partnerships,South,Lead,Pooja Sharma,Lost,0
+LEAD-2026-0089,2026-10-02,Aspirations,West,Counselled,Ananya Iyer,In_Progress,0
+LEAD-2026-0090,2026-11-05,Aspirations,South,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0091,2026-11-12,Aspirations,South,Counselled,Vikram Malhotra,In_Progress,0
+LEAD-2026-0092,2026-08-31,School Partnerships,Central,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0093,2026-10-02,School Partnerships,International,Counselled,Pooja Sharma,In_Progress,0
+LEAD-2026-0094,2026-10-07,Aspirations,North,Counselled,Sneha Patel,In_Progress,0
+LEAD-2026-0095,2026-10-11,Study Abroad,International,Enrolled,Pooja Sharma,Won,85333
+LEAD-2026-0096,2026-11-10,Aspirations,South,Counselled,Ananya Iyer,In_Progress,0
+LEAD-2026-0097,2026-11-12,Aspirations,International,Enrolled,Amitabh Sen,Won,20436
+LEAD-2026-0098,2026-11-14,Aspirations,International,Contacted,Rahul Verma,In_Progress,0
+LEAD-2026-0099,2026-09-23,Study Abroad,Central,Contacted,Vikram Malhotra,Lost,0
+LEAD-2026-0100,2026-09-23,Aspirations,East,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0101,2026-09-23,School Partnerships,International,Contacted,Rahul Verma,Lost,0
+LEAD-2026-0102,2026-10-19,Study Abroad,North,Enrolled,Vikram Malhotra,Won,93640
+LEAD-2026-0103,2026-10-17,School Partnerships,South,Application_Started,Pooja Sharma,In_Progress,0
+LEAD-2026-0104,2026-09-22,Study Abroad,North,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0105,2026-09-30,School Partnerships,East,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0106,2026-11-12,School Partnerships,East,Lead,Sneha Patel,Lost,0
+LEAD-2026-0107,2026-09-17,School Partnerships,East,Contacted,Sneha Patel,Lost,0
+LEAD-2026-0108,2026-10-19,Aspirations,East,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0109,2026-10-07,School Partnerships,South,Enrolled,Rahul Verma,Won,355887
+LEAD-2026-0110,2026-09-05,School Partnerships,Central,Lead,Ananya Iyer,Lost,0
+LEAD-2026-0111,2026-11-01,Aspirations,East,Contacted,Ananya Iyer,In_Progress,0
+LEAD-2026-0112,2026-11-13,School Partnerships,International,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0113,2026-11-06,School Partnerships,North,Application_Started,Pooja Sharma,In_Progress,0
+LEAD-2026-0114,2026-11-06,School Partnerships,North,Counselled,Ananya Iyer,In_Progress,0
+LEAD-2026-0115,2026-09-06,Aspirations,International,Enrolled,Rahul Verma,Won,23956
+LEAD-2026-0116,2026-10-13,Study Abroad,Central,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0117,2026-10-13,School Partnerships,International,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0118,2026-10-03,Study Abroad,Central,Lead,Sneha Patel,Lost,0
+LEAD-2026-0119,2026-10-10,Aspirations,East,Contacted,Rahul Verma,Lost,0
+LEAD-2026-0120,2026-09-11,School Partnerships,Central,Contacted,Amitabh Sen,Lost,0
+LEAD-2026-0121,2026-10-22,School Partnerships,East,Contacted,Pooja Sharma,Lost,0
+LEAD-2026-0122,2026-10-01,Study Abroad,West,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0123,2026-10-23,Study Abroad,East,Enrolled,Ananya Iyer,Won,115348
+LEAD-2026-0124,2026-11-04,School Partnerships,South,Contacted,Rahul Verma,In_Progress,0
+LEAD-2026-0125,2026-09-15,Aspirations,North,Enrolled,Amitabh Sen,Won,18011
+LEAD-2026-0126,2026-09-08,Aspirations,South,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0127,2026-11-11,School Partnerships,International,Contacted,Ananya Iyer,Lost,0
+LEAD-2026-0128,2026-11-11,Study Abroad,Central,Contacted,Sneha Patel,Lost,0
+LEAD-2026-0129,2026-10-07,School Partnerships,Central,Lead,Ananya Iyer,Lost,0
+LEAD-2026-0130,2026-11-10,School Partnerships,West,Lead,Ananya Iyer,In_Progress,0
+LEAD-2026-0131,2026-10-13,School Partnerships,South,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0132,2026-10-29,Study Abroad,South,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0133,2026-11-03,School Partnerships,International,Application_Started,Ananya Iyer,In_Progress,0
+LEAD-2026-0134,2026-11-04,Aspirations,International,Contacted,Vikram Malhotra,Lost,0
+LEAD-2026-0135,2026-10-30,School Partnerships,North,Enrolled,Vikram Malhotra,Won,535823
+LEAD-2026-0136,2026-10-24,Study Abroad,East,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0137,2026-11-13,Study Abroad,International,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0138,2026-11-05,Aspirations,West,Contacted,Amitabh Sen,Lost,0
+LEAD-2026-0139,2026-10-28,Study Abroad,West,Contacted,Vikram Malhotra,Lost,0
+LEAD-2026-0140,2026-11-15,School Partnerships,North,Contacted,Rahul Verma,Lost,0
+LEAD-2026-0141,2026-11-05,Aspirations,Central,Contacted,Rahul Verma,Lost,0
+LEAD-2026-0142,2026-10-26,Aspirations,International,Enrolled,Sneha Patel,Won,27888
+LEAD-2026-0143,2026-11-11,Aspirations,International,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0144,2026-10-30,Aspirations,North,Contacted,Ananya Iyer,In_Progress,0
+LEAD-2026-0145,2026-10-17,Study Abroad,East,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0146,2026-10-31,Study Abroad,Central,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0147,2026-10-17,School Partnerships,South,Contacted,Ananya Iyer,In_Progress,0
+LEAD-2026-0148,2026-10-02,Aspirations,International,Contacted,Amitabh Sen,Lost,0
+LEAD-2026-0149,2026-10-13,Study Abroad,East,Enrolled,Vikram Malhotra,Won,119839
+LEAD-2026-0150,2026-09-27,Study Abroad,South,Lead,Ananya Iyer,In_Progress,0
+LEAD-2026-0151,2026-09-10,Study Abroad,West,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0152,2026-09-18,Study Abroad,South,Lead,Ananya Iyer,Lost,0
+LEAD-2026-0153,2026-08-31,Aspirations,South,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0154,2026-10-31,School Partnerships,East,Lead,Sneha Patel,In_Progress,0
+LEAD-2026-0155,2026-11-06,Study Abroad,International,Contacted,Rahul Verma,In_Progress,0
+LEAD-2026-0156,2026-10-17,School Partnerships,North,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0157,2026-09-25,Aspirations,International,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0158,2026-09-30,Study Abroad,West,Lead,Pooja Sharma,Lost,0
+LEAD-2026-0159,2026-09-07,Study Abroad,International,Lead,Amitabh Sen,Lost,0
+LEAD-2026-0160,2026-11-02,Aspirations,North,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0161,2026-11-04,Aspirations,Central,Enrolled,Sneha Patel,Won,26157
+LEAD-2026-0162,2026-10-10,School Partnerships,Central,Counselled,Vikram Malhotra,In_Progress,0
+LEAD-2026-0163,2026-09-14,Study Abroad,North,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0164,2026-09-14,Aspirations,North,Counselled,Ananya Iyer,In_Progress,0
+LEAD-2026-0165,2026-11-06,Aspirations,West,Enrolled,Pooja Sharma,Won,22649
+LEAD-2026-0166,2026-10-09,Study Abroad,North,Counselled,Ananya Iyer,In_Progress,0
+LEAD-2026-0167,2026-10-06,Study Abroad,West,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0168,2026-09-07,Study Abroad,International,Counselled,Vikram Malhotra,In_Progress,0
+LEAD-2026-0169,2026-10-26,Aspirations,International,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0170,2026-10-22,Aspirations,East,Lead,Rahul Verma,Lost,0
+LEAD-2026-0171,2026-09-20,School Partnerships,West,Counselled,Amitabh Sen,Lost,0
+LEAD-2026-0172,2026-11-07,Aspirations,Central,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0173,2026-10-31,School Partnerships,Central,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0174,2026-09-27,School Partnerships,International,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0175,2026-11-11,School Partnerships,West,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0176,2026-11-02,Aspirations,Central,Lead,Amitabh Sen,In_Progress,0
+LEAD-2026-0177,2026-09-27,School Partnerships,South,Application_Started,Vikram Malhotra,In_Progress,0
+LEAD-2026-0178,2026-10-27,School Partnerships,East,Application_Started,Pooja Sharma,In_Progress,0
+LEAD-2026-0179,2026-09-16,Study Abroad,Central,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0180,2026-10-04,School Partnerships,South,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0181,2026-11-08,School Partnerships,Central,Counselled,Pooja Sharma,In_Progress,0
+LEAD-2026-0182,2026-11-06,Aspirations,East,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0183,2026-10-27,Study Abroad,North,Counselled,Vikram Malhotra,In_Progress,0
+LEAD-2026-0184,2026-11-02,School Partnerships,East,Lead,Vikram Malhotra,In_Progress,0
+LEAD-2026-0185,2026-10-03,Study Abroad,West,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0186,2026-11-12,Aspirations,International,Counselled,Ananya Iyer,In_Progress,0
+LEAD-2026-0187,2026-10-20,School Partnerships,South,Counselled,Amitabh Sen,In_Progress,0
+LEAD-2026-0188,2026-11-10,Study Abroad,North,Enrolled,Sneha Patel,Won,83378
+LEAD-2026-0189,2026-09-03,School Partnerships,East,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0190,2026-10-01,School Partnerships,International,Counselled,Rahul Verma,In_Progress,0
+LEAD-2026-0191,2026-09-23,School Partnerships,Central,Counselled,Sneha Patel,In_Progress,0
+LEAD-2026-0192,2026-09-06,Study Abroad,North,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0193,2026-09-05,Study Abroad,West,Enrolled,Vikram Malhotra,Won,114431
+LEAD-2026-0194,2026-10-18,School Partnerships,South,Contacted,Vikram Malhotra,In_Progress,0
+LEAD-2026-0195,2026-09-02,School Partnerships,East,Counselled,Rahul Verma,Lost,0
+LEAD-2026-0196,2026-10-23,Study Abroad,International,Lead,Sneha Patel,Lost,0
+LEAD-2026-0197,2026-11-06,Aspirations,East,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0198,2026-11-11,Aspirations,North,Contacted,Sneha Patel,In_Progress,0
+LEAD-2026-0199,2026-09-13,School Partnerships,West,Contacted,Sneha Patel,In_Progress,0
+LEAD-2026-0200,2026-11-18,School Partnerships,North,Enrolled,Pooja Sharma,Won,255982
+LEAD-2026-0201,2026-10-25,Study Abroad,West,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0202,2026-10-17,Study Abroad,East,Lead,Sneha Patel,Lost,0
+LEAD-2026-0203,2026-09-04,School Partnerships,South,Contacted,Sneha Patel,Lost,0
+LEAD-2026-0204,2026-10-01,Study Abroad,East,Counselled,Rahul Verma,In_Progress,0
+LEAD-2026-0205,2026-11-14,Aspirations,International,Enrolled,Sneha Patel,Won,32132
+LEAD-2026-0206,2026-09-03,Study Abroad,West,Counselled,Rahul Verma,In_Progress,0
+LEAD-2026-0207,2026-09-01,Study Abroad,Central,Application_Started,Ananya Iyer,In_Progress,0
+LEAD-2026-0208,2026-09-25,Aspirations,West,Counselled,Pooja Sharma,In_Progress,0
+LEAD-2026-0209,2026-09-25,School Partnerships,South,Application_Started,Vikram Malhotra,In_Progress,0
+LEAD-2026-0210,2026-10-06,Aspirations,East,Application_Started,Vikram Malhotra,In_Progress,0
+LEAD-2026-0211,2026-10-18,Aspirations,East,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0212,2026-09-23,Study Abroad,East,Enrolled,Sneha Patel,Won,116378
+LEAD-2026-0213,2026-09-14,Study Abroad,East,Counselled,Pooja Sharma,In_Progress,0
+LEAD-2026-0214,2026-10-20,Study Abroad,International,Enrolled,Ananya Iyer,Won,78485
+LEAD-2026-0215,2026-11-15,Aspirations,Central,Counselled,Ananya Iyer,Lost,0
+LEAD-2026-0216,2026-10-09,Study Abroad,Central,Counselled,Ananya Iyer,In_Progress,0
+LEAD-2026-0217,2026-10-15,School Partnerships,North,Lead,Ananya Iyer,In_Progress,0
+LEAD-2026-0218,2026-10-12,Study Abroad,International,Enrolled,Pooja Sharma,Won,103810
+LEAD-2026-0219,2026-10-26,Aspirations,International,Contacted,Vikram Malhotra,In_Progress,0
+LEAD-2026-0220,2026-10-04,School Partnerships,North,Contacted,Ananya Iyer,In_Progress,0
+LEAD-2026-0221,2026-09-02,Aspirations,International,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0222,2026-11-06,Aspirations,International,Application_Started,Amitabh Sen,In_Progress,0
+LEAD-2026-0223,2026-09-28,Aspirations,North,Contacted,Pooja Sharma,Lost,0
+LEAD-2026-0224,2026-10-07,Study Abroad,West,Contacted,Amitabh Sen,Lost,0
+LEAD-2026-0225,2026-11-12,School Partnerships,Central,Enrolled,Sneha Patel,Won,370722
+LEAD-2026-0226,2026-09-01,School Partnerships,North,Lead,Amitabh Sen,Lost,0
+LEAD-2026-0227,2026-09-08,School Partnerships,Central,Counselled,Sneha Patel,In_Progress,0
+LEAD-2026-0228,2026-10-12,School Partnerships,South,Lead,Vikram Malhotra,In_Progress,0
+LEAD-2026-0229,2026-10-18,Study Abroad,International,Counselled,Sneha Patel,In_Progress,0
+LEAD-2026-0230,2026-10-23,Aspirations,North,Enrolled,Vikram Malhotra,Won,30970
+LEAD-2026-0231,2026-09-04,School Partnerships,International,Enrolled,Ananya Iyer,Won,348824
+LEAD-2026-0232,2026-09-08,Aspirations,Central,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0233,2026-09-11,Aspirations,North,Contacted,Rahul Verma,In_Progress,0
+LEAD-2026-0234,2026-10-10,Study Abroad,South,Application_Started,Pooja Sharma,In_Progress,0
+LEAD-2026-0235,2026-10-23,Study Abroad,West,Contacted,Vikram Malhotra,In_Progress,0
+LEAD-2026-0236,2026-09-16,Study Abroad,South,Enrolled,Rahul Verma,Won,92915
+LEAD-2026-0237,2026-11-06,School Partnerships,South,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0238,2026-11-12,School Partnerships,Central,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0239,2026-10-31,School Partnerships,South,Counselled,Pooja Sharma,Lost,0
+LEAD-2026-0240,2026-10-27,Aspirations,International,Contacted,Amitabh Sen,Lost,0
+LEAD-2026-0241,2026-09-07,Aspirations,North,Contacted,Sneha Patel,Lost,0
+LEAD-2026-0242,2026-09-19,Aspirations,North,Enrolled,Pooja Sharma,Won,22845
+LEAD-2026-0243,2026-10-09,Study Abroad,West,Counselled,Pooja Sharma,In_Progress,0
+LEAD-2026-0244,2026-09-14,Aspirations,South,Counselled,Rahul Verma,In_Progress,0
+LEAD-2026-0245,2026-10-21,Aspirations,International,Counselled,Sneha Patel,Lost,0
+LEAD-2026-0246,2026-09-15,Study Abroad,International,Enrolled,Rahul Verma,Won,107678
+LEAD-2026-0247,2026-09-15,Study Abroad,West,Enrolled,Vikram Malhotra,Won,139788
+LEAD-2026-0248,2026-11-14,Aspirations,Central,Counselled,Vikram Malhotra,Lost,0
+LEAD-2026-0249,2026-11-03,Study Abroad,South,Contacted,Rahul Verma,In_Progress,0
+LEAD-2026-0250,2026-09-08,Study Abroad,West,Contacted,Amitabh Sen,Lost,0

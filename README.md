@@ -186,7 +186,7 @@ OpenCrewBot includes a comprehensive automated test suite covering all modules, 
 ```bash
 pnpm test
 ```
-*Executes all 73 tests across 10 test files:*
+*Executes all 72 tests across 9 test suites:*
 - `src/lib/server/memory.test.ts` (Scoped memory, provenance, secret redaction, live disk reads)
 - `src/lib/server/permissions.test.ts` (PermissionGuard, risk classification, approval requests, rejection)
 - `src/db/index.test.ts` (Database schema, CRUD, version migrations)
@@ -196,13 +196,17 @@ pnpm test
 - `src/lib/server/capabilities.test.ts` (CSV analytics, web fetcher, skills loader, scheduled routines)
 - `src/lib/server/models.test.ts` (Multi-provider routing, fallbacks, token cost tracking, mock prefixes)
 - `src/lib/server/demos-e2e.test.ts` (Phase 8 MeetUniversity demonstrations 1 through 7 + evaluation readiness)
-- `scripts/generate_evidence.ts` (Master demonstration evidence runner)
 
-### Generate Phase 8 Evidence Artifacts:
-```bash
-pnpm run evidence
-```
-Executes all demonstrations through the live backend engines and saves timestamped Markdown and JSON artifacts to `docs/test-evidence/`.
+### Verification Evidence Artifacts:
+Pre-executed demonstration logs and audit artifacts for all 7 business demonstrations are saved and documented in:
+- `docs/test-evidence/demo1_market_intelligence.md` / `.json`
+- `docs/test-evidence/demo2_marketing_campaign.md` / `.json`
+- `docs/test-evidence/demo3_business_analysis.md` / `.json`
+- `docs/test-evidence/demo4_dev_team_github.md` / `.json`
+- `docs/test-evidence/demo5_autonomous_routine.md` / `.json`
+- `docs/test-evidence/demo6_memory_persistence.md` / `.json`
+- `docs/test-evidence/demo7_human_intervention.md` / `.json`
+- `docs/test-evidence/eval_readiness_replan.md` / `.json`
 
 ### TypeScript Typecheck:
 ```bash

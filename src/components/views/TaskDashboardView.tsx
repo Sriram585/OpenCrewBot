@@ -154,13 +154,14 @@ export function TaskDashboardView() {
             ))}
           </select>
           <Button
+            id="launch-goal-button"
             variant="primary"
             disabled={launching || !goal.trim()}
             onClick={handleLaunch}
             className="gap-2 shrink-0"
           >
             <Play size={15} />
-            {launching ? "Orchestrating..." : "Launch DAG Run"}
+            {launching ? "Orchestrating..." : "Decompose & Run Goal"}
           </Button>
         </div>
 

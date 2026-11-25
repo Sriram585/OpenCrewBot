@@ -1,10 +1,10 @@
 # Demonstration 7: Human Intervention & Action Rejection
 
-**Timestamp:** `2026-11-23T11:15:06.150Z`  
+**Timestamp:** `2026-11-25T03:08:49.031Z`  
 **Tool Requested:** `slack_post_message`  
 **Risk Level:** `external_write`  
 **Enforced Permission Level:** `ASK_FIRST`  
-**Approval Request ID:** `appr-f8a3d525-a5e2-408c-8fe7-0c248f2d9415`
+**Approval Request ID:** `appr-4f4fb7fa-261d-4b81-b54f-4d7fe1d328e3`
 
 ---
 
@@ -20,7 +20,7 @@ The agent requested to post to `#leadership`. Execution was halted:
 - **Decision:** **REJECTED**
 - **Resolved By:** `Executive Supervisor`
 - **Rejection Reason:** "Rejected: Review messaging internally before posting to leadership channel."
-- **Resolved At:** `2026-11-23T11:15:06.153Z`
+- **Resolved At:** `2026-11-25T03:08:49.032Z`
 
 ---
 
@@ -30,4 +30,4 @@ The agent requested to post to `#leadership`. Execution was halted:
 
 | Log ID | Tool | Permission Level | Decision | Result / Error |
 | :--- | :--- | :--- | :--- | :--- |
-| `8f5ce600-f958-44e4-a8c7-095fefcdfb81` | `slack_post_message` | ASK_FIRST | **REJECTED** | Rejected by Executive Supervisor: Rejected: Review messaging internally before posting to leadership channel. |
+| `71ff79f9-12c4-4364-9e43-f2f4d4f7d004` | `slack_post_message` | ASK_FIRST | **REJECTED** | Rejected by Executive Supervisor: Rejected: Review messaging internally before posting to leadership channel. |

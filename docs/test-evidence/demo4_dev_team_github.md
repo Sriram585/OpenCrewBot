@@ -1,17 +1,17 @@
 # Demonstration 4: Engineering Team GitHub Inspection & Governance
 
-**Timestamp:** `2026-11-23T11:15:04.501Z`  
+**Timestamp:** `2026-11-25T03:08:48.403Z`  
 **Repository Inspected:** `octocat/Hello-World`  
 **Target Write Action:** `github_create_issue`  
-**Governance Result:** **INTERCEPTED BY PERMISSIONGUARD (Approval ID: `appr-14acb173-0253-4350-b49e-61d7ab25aecb`)**
+**Governance Result:** **INTERCEPTED BY PERMISSIONGUARD (Approval ID: `appr-b9fa6079-7260-464a-acaa-4568ceca7060`)**
 
 ---
 
 ## 1. Repository Inspection Summary
 - **Full Name:** octocat/Hello-World
 - **Default Branch:** `master`
-- **Open Issues:** 7575
-- **Stars:** 4037
+- **Open Issues:** 350
+- **Stars:** 2800
 - **Description:** My first repository on GitHub!
 
 ---
@@ -28,7 +28,7 @@ Automated audit suggests adding test coverage badges and build status pills. Tok
 ## 3. Human Approval Interception & Credential Sanitization
 Notice that the sensitive token `SECRET_ghp_doNotLeakCredentials12345` is **NEVER** stored in SQLite or exposed in previews.
 
-- **Approval Request ID:** `appr-14acb173-0253-4350-b49e-61d7ab25aecb`
+- **Approval Request ID:** `appr-b9fa6079-7260-464a-acaa-4568ceca7060`
 - **Status:** **PENDING**
 - **Risk Level:** **external_write**
 - **Sanitized Payload Stored:**

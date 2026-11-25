@@ -135,6 +135,36 @@ export function ApprovalCentreView() {
     }
   };
 
+  const handleSimulateGitHubRequest = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/approvals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: "agent-code_architect",
+          toolName: "github_create_issue",
+          riskLevel: "sensitive",
+          args: {
+            repo: "meetuniversity/core-admissions",
+            title: "[MeetUniversity-Audit] Upgrade README with automated verification badges",
+            body: "Deploy autonomous webhook handler with elevated repository write access.",
+            apiKey: "ghp_SECRET_TOKEN_REDACTED_BY_GUARD",
+          },
+        }),
+      });
+      if (res.ok) {
+        setMessage({ text: "Simulated GitHub write request registered in PermissionGuard queue." });
+        await fetchApprovals();
+        setActiveTab("pending");
+      }
+    } catch {
+      setMessage({ text: "Failed to simulate approval request.", error: true });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const pendingRequests = requests.filter((r) => r.status === "PENDING");
   const historyRequests = requests.filter((r) => {
     if (statusFilter === "ALL") return r.status !== "PENDING";
@@ -186,14 +216,25 @@ export function ApprovalCentreView() {
           </p>
         </div>
 
-        <button
-          onClick={fetchApprovals}
-          disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 transition-colors w-fit"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            id="simulate-github-request-button"
+            onClick={handleSimulateGitHubRequest}
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 transition-colors"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            Simulate GitHub Write Request
+          </button>
+          <button
+            onClick={fetchApprovals}
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 transition-colors w-fit"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {message && (

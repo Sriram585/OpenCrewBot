@@ -1,6 +1,6 @@
 # Demonstration 3: Business Analysis & Funnel Bottleneck Detection
 
-**Timestamp:** `2026-11-23T11:15:04.592Z`  
+**Timestamp:** `2026-11-25T03:08:48.358Z`  
 **Dataset Path:** `data/samples/meetuniversity_sales.csv`  
 **Rows Analyzed:** **250**  
 **Total Pipeline Revenue Computed:** **INR 47,24,985**

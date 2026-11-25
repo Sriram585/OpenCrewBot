@@ -1,6 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -10,41 +8,65 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# Testing & Coverage
 /coverage
+.nyc_output
 
-# next.js
+# Next.js Build Outputs
 /.next/
 /out/
-
-# production
 /build
+.turbo
+.vercel
 
-# misc
-.DS_Store
-*.pem
+# Scripts & Runner Tools (exclude from repository tracking)
+/scripts/
+*.sh
+*.bat
+*.cmd
+*.ps1
 
-# debug
+# Python & Virtual Environments
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Temp Recordings & Chunks
+docs/demo/temp_rec/
+temp_rec/
+*.tmp
+*.temp
+
+# Explicitly preserve the main submission demo video
+!docs/demo/opencrewbot_demo.webm
+
+# Environment Files
+.env*
+!.env.example
+
+# Runtime App Data & Databases (exclude DBs and runtime memory, preserve skills & sample datasets)
+/data/*
+!/data/skills/
+!/data/samples/
+
+# TypeScript & Cache
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs & Debug
+*.log
+*.log*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# app data (bots, chats, MEMORY.md files)
-/data/
-
-# keep the example env file
-!.env.example
+# IDE & OS Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.pem
 .gstack/
-
-venv
